@@ -35,6 +35,7 @@
   </section>
   <section>
     <p>Goodbye {name}</p>
+    <input />
     <button
       id="login"
       data-l10n-id="login"
