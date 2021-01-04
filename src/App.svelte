@@ -7,19 +7,19 @@
   };
 </script>
 
-<style>
+<style lang="scss">
   main {
     text-align: center;
     padding: 1rem;
     max-width: 240px;
     margin: 0 auto;
-  }
 
-  h1 {
-    color: blue;
-    text-transform: uppercase;
-    font-size: 1rem;
-    font-weight: 600;
+    h1 {
+      color: red;
+      text-transform: uppercase;
+      font-size: 1rem;
+      font-weight: 600;
+    }
   }
 
   @media (min-width: 640px) {
