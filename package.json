@@ -1,6 +1,10 @@
 {
   "name": "lumber-room",
   "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FloppyNotFound/lumber-room.git"
+  },
   "scripts": {
     "build": "rollup -c",
     "build:watch": "rollup -c -w",
