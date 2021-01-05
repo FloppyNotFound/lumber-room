@@ -1,7 +1,7 @@
 {
   "version": "0.2.0",
-  "name": "priviledged-app",
-  "description": "Demonstrates how to use permissions to load remote content",
+  "name": "Lumber-Room",
+  "description": "A Dropbox client for KaiOS",
   "launch_path": "/index.html",
   "icons": {
     "16": "/img/icons/icon16x16.png",
@@ -14,11 +14,18 @@
     "url": "https://github.com/FloppyNotFound"
   },
   "type": "privileged",
+  "cursor": true,
   "permissions": {
     "systemXHR": {
       "description": "Required to load remote content"
     }
   },
+  "redirects": [
+    {
+      "from": "http://localhost:5000",
+      "to": "/index.html"
+    }
+  ],
   "installs_allowed_from": ["*"],
   "locales": {
     "de": {

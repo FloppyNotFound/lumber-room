@@ -1,10 +1,35 @@
 <script lang="ts">
-  export let name: string;
+  import { onMount } from "svelte";
+  import parseAuthQueryString from "./Auth/helpers/parse-auth-query-string";
+  import Auth from "./Auth/Auth.svelte";
+  import { authStore } from "./Auth/auth-store";
+  import ListWrapper from "./ListWrapper/ListWrapper.svelte";
+  import { LumberRoomDatabase } from "./DAL/lumber-room.database";
 
-  const loginRequested = (): void => {
-    console.log("login requested");
-    console.log("TODO");
-  };
+  const clientId = "oejf5drg46j71z6";
+
+  const db = new LumberRoomDatabase();
+
+  onMount(async () => {
+    await db.transaction("rw", db.authTable, async () => {
+      const parsedAuthString = parseAuthQueryString(window.location.hash);
+
+      const authTable = await db.authTable.toArray();
+      const cachedAccessToken = authTable.length
+        ? authTable[0].accessToken
+        : void 0;
+
+      const newAccessToken =
+        parsedAuthString["access_token"] ?? cachedAccessToken;
+
+      if (cachedAccessToken !== newAccessToken) {
+        await db.authTable.clear();
+        await db.authTable.add({ accessToken: newAccessToken });
+      }
+
+      authStore.set(newAccessToken);
+    });
+  });
 </script>
 
 <style lang="scss">
@@ -31,17 +56,13 @@
 
 <main>
   <section>
-    <h1 data-l10n-id="app_title">Privileged app</h1>
+    <h1 data-l10n-id="app_title">APP_TITLE</h1>
   </section>
   <section>
-    <p>Goodbye {name}</p>
-    <input />
-    <button
-      id="login"
-      data-l10n-id="login"
-      on:click={loginRequested}>Login</button>
+    {#if !$authStore}
+      <Auth {clientId} />
+    {:else}
+      <ListWrapper accessToken={$authStore} />
+    {/if}
   </section>
 </main>
-
-<!-- https://github.com/kaiostech/sample-vanilla/blob/master/src/index.js -->
-<!-- https://stackoverflow.com/questions/55842088/svelte-hot-reloading-issue -->
