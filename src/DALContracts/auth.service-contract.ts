@@ -5,4 +5,6 @@ export interface AuthServiceContract {
     newAccessToken: string,
     newAccessTokenExpiresInXSeconds: number
   ): PromiseLike<string>;
+
+  logout(): PromiseLike<void>;
 }

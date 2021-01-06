@@ -34,6 +34,14 @@ export class AuthService implements AuthServiceContract {
     });
   }
 
+  logout(): PromiseLike<void> {
+    return this._db.transaction(
+      "rw",
+      this._db.authTable,
+      async () => await this._db.authTable.clear()
+    );
+  }
+
   private getCachedAccessToken(authTable: AuthTable[]): string | undefined {
     const authData = authTable.length ? authTable[0] : void 0;
     if (!authData) {

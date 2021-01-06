@@ -25,6 +25,11 @@
 
     authStore.set(accessToken);
   });
+
+  const logout = async (): Promise<void> => {
+    await authService.logout();
+    authStore.set(void 0);
+  };
 </script>
 
 <style lang="scss">
@@ -57,7 +62,7 @@
     {#if !$authStore}
       <Auth {clientId} />
     {:else}
-      <ListWrapper accessToken={$authStore} />
+      <ListWrapper accessToken={$authStore} on:autherror={logout} />
     {/if}
   </section>
 </main>

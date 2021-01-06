@@ -1,7 +1,10 @@
 <script lang="ts">
+  import { createEventDispatcher } from "svelte";
   import type { Dropbox, files, Error } from "dropbox";
 
   export let accessToken: string;
+
+  const dispatch = createEventDispatcher();
 
   let listFolderResult: files.ListFolderResult;
 
@@ -19,18 +22,22 @@
     const dbx = new Dropbox.Dropbox({ accessToken });
 
     (<Dropbox>dbx)
-      .filesListFolder({ path: "" })
+      .filesListFolder({ path: "", include_media_info: true })
       .then((response) => (listFolderResult = response.result))
       .catch((error: Error<files.ListFolderError>) => {
         // TODO: improve errorhandling
         console.error(error);
         alert(
-          error.error +
+          (error.error ?? "<no error>") +
             " // " +
-            error.error_summary +
+            (error.error_summary ?? "<no summary>") +
             " // " +
-            error.user_message
+            (error.user_message ?? "<no message>")
         );
+
+        // TODO: only dispatch auth error if it really is an auth error
+        // find out how to check if it is an auth error
+        dispatch("autherror");
       });
   };
 </script>
