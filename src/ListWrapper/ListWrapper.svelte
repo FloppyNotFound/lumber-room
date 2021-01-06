@@ -36,12 +36,15 @@
     await (<Dropbox>dbx)
       .filesListFolder({ path, include_media_info: true })
       .then((response) => (listFolderResult = response.result))
+      .then(() => (isLoading = false))
       .catch(
         (
           errorResponse: DropboxResponseError<
             Error<files.ListFolderError | auth.AuthError>
           >
         ) => {
+          isLoading = false;
+
           if (!errorResponse.error?.error) {
             // TODO: show control instead of alert
             alert(errorResponse.error);
@@ -72,8 +75,7 @@
 
           alert(tag);
         }
-      )
-      .finally(() => (isLoading = false));
+      );
   };
 </script>
 
