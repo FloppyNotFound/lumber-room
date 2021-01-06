@@ -10,7 +10,7 @@ export class LumberRoomDatabase extends Dexie {
     super(LumberRoomDatabase.databaseName);
 
     this.version(1).stores({
-      authTable: "++id,accessToken",
+      authTable: "++id,accessToken,validUntil",
     });
 
     this.authTable = this.table("authTable");

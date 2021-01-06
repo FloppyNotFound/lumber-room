@@ -4,31 +4,26 @@
   import Auth from "./Auth/Auth.svelte";
   import { authStore } from "./Auth/auth-store";
   import ListWrapper from "./ListWrapper/ListWrapper.svelte";
-  import { LumberRoomDatabase } from "./DAL/lumber-room.database";
+  import { AuthService } from "./DAL/services/auth.service";
 
   const clientId = "oejf5drg46j71z6";
 
-  const db = new LumberRoomDatabase();
+  const authService = new AuthService();
 
   onMount(async () => {
-    await db.transaction("rw", db.authTable, async () => {
-      const parsedAuthString = parseAuthQueryString(window.location.hash);
+    const parsedAuthString = parseAuthQueryString(window.location.hash);
+    const newAccessToken = parsedAuthString["access_token"];
+    const newAccessTokenExpiresInXSeconds =
+      parsedAuthString["expires_in"] ?? "0";
 
-      const authTable = await db.authTable.toArray();
-      const cachedAccessToken = authTable.length
-        ? authTable[0].accessToken
-        : void 0;
+    const accessToken = await (!newAccessToken
+      ? authService.getAccessToken()
+      : authService.setAccessToken(
+          newAccessToken,
+          newAccessTokenExpiresInXSeconds
+        ));
 
-      const newAccessToken =
-        parsedAuthString["access_token"] ?? cachedAccessToken;
-
-      if (cachedAccessToken !== newAccessToken) {
-        await db.authTable.clear();
-        await db.authTable.add({ accessToken: newAccessToken });
-      }
-
-      authStore.set(newAccessToken);
-    });
+    authStore.set(accessToken);
   });
 </script>
 
