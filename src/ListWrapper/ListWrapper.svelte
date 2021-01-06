@@ -24,6 +24,9 @@
     listFolderResult?.entries.filter((e) => e[".tag"] === "file")
   );
 
+  $: hasMore = listFolderResult?.has_more;
+  $: cursor = listFolderResult?.cursor;
+
   const loadItems = async (path: string = ""): Promise<void> => {
     isLoading = true;
 
@@ -39,7 +42,7 @@
             Error<files.ListFolderError | auth.AuthError>
           >
         ) => {
-          if (errorResponse.status === 400) {
+          if (!errorResponse.error?.error) {
             // TODO: show control instead of alert
             alert(errorResponse.error);
             return;
@@ -61,11 +64,13 @@
               "user_suspended",
             ].includes(tag)
           ) {
+            // TODO: show control instead of alert
+            alert("Your session has run out, you will be signed out");
             dispatch("autherror");
             return;
           }
 
-          console.log(tag);
+          alert(tag);
         }
       )
       .finally(() => (isLoading = false));
@@ -91,5 +96,12 @@
   {#if hasFiles}
     <p>Files</p>
     {#each remoteFiles as file, i (file.id)}{i + 1} - {file.name}{/each}
+  {/if}
+
+  <!-- TODO: load more items -->
+  {#if hasMore}
+    There are more entries available, load them with cursor
+    {cursor}
+    [not implemented yet]
   {/if}
 </div>
