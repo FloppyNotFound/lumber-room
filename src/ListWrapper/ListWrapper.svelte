@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Dropbox, files } from "dropbox";
+  import type { Dropbox, files, Error } from "dropbox";
 
   export let accessToken: string;
 
@@ -21,10 +21,16 @@
     (<Dropbox>dbx)
       .filesListFolder({ path: "" })
       .then((response) => (listFolderResult = response.result))
-      .catch((error) => {
+      .catch((error: Error<files.ListFolderError>) => {
         // TODO: improve errorhandling
         console.error(error);
-        alert(error);
+        alert(
+          error.error +
+            " // " +
+            error.error_summary +
+            " // " +
+            error.user_message
+        );
       });
   };
 </script>
