@@ -45,8 +45,8 @@
     left: 0;
 
     &__softkeys {
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       background-color: #cccccc;
       color: #323232;
       padding: 0 0.25rem;
@@ -59,8 +59,13 @@
       }
 
       &-center {
-        padding-left: 1.5rem;
         font-size: 1rem;
+        margin-left: auto !important;
+        margin-right: auto !important;
+      }
+
+      &-right {
+        margin-left: auto !important;
       }
     }
   }
@@ -74,6 +79,8 @@
         on:click={keyDownHandler.bind(this, { key: 'SoftLeft' })}>
         {softkeys.left.label}
       </h5>
+    {:else}
+      <div />
     {/if}
     {#if softkeys.center}
       <h5
@@ -81,6 +88,8 @@
         on:click={keyDownHandler.bind(this, { key: 'Enter' })}>
         {softkeys.center.label}
       </h5>
+    {:else}
+      <div />
     {/if}
     {#if softkeys.right}
       <h5
@@ -88,6 +97,8 @@
         on:click={keyDownHandler.bind(this, { key: 'SoftRight' })}>
         {softkeys.right.label}
       </h5>
+    {:else}
+      <div />
     {/if}
   </div>
 </footer>
