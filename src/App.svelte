@@ -99,9 +99,6 @@
 
   <main>
     <section>
-      <h1 data-l10n-id="app_title">APP_TITLE</h1>
-    </section>
-    <section>
       {#if !$authStore}
         <Auth {clientId} />
       {:else}

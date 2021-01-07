@@ -79,7 +79,7 @@
   };
 </script>
 
-<h2 data-l10n-id="list-wrapper-header">List Wrapper</h2>
+<h2 data-l10n-id="list-wrapper-header">List Wrapper Header</h2>
 <button
   on:click={loadItems.bind(this, '')}
   disabled={isLoading}

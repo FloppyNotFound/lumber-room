@@ -1,3 +1,4 @@
+/* See https://developer.kaiostech.com/design-guide/typography */
 html,
 body {
   position: relative;
@@ -11,4 +12,51 @@ body {
   padding: 8px;
   box-sizing: border-box;
   font-family: "Open Sans", sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+}
+
+h1 {
+  font-size: 17px;
+  font-weight: 400;
+}
+h2 {
+  font-size: 17px;
+  font-weight: 600;
+}
+h3 {
+  font-size: 14px;
+  font-weight: 400;
+}
+h4 {
+  font-size: 14px;
+  font-weight: 400;
+}
+h5 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.p-pri {
+  font-size: 17px;
+  font-weight: 400;
+}
+.p-sec {
+  font-size: 14px;
+  font-weight: 400px;
+}
+.p-thi {
+  font-size: 12px;
+  font-weight: 400;
+}
+
+a {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+button {
+  font-size: 17px;
+  font-weight: 400;
+  font-family: inherit;
 }
