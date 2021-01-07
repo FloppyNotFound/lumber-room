@@ -7,6 +7,7 @@
   import ListWrapper from "./UI/ListWrapper/ListWrapper.svelte";
   import Header from "./UI/Header/Header.svelte";
   import SoftKeys from "./UI/SoftKeys/SoftKeys.svelte";
+  import { softkeysStore } from "./UI/SoftKeys/softkeys-store";
 
   const clientId = "oejf5drg46j71z6";
 
@@ -26,7 +27,41 @@
         ));
 
     authStore.set(accessToken);
+
+    initSoftkeys();
   });
+
+  const initSoftkeys = (): void => {
+    softkeysStore.setLeft({
+      label: "Back",
+      callback: () => {
+        return new Promise((resolve) => {
+          console.log("You clicked on SoftLeft");
+          resolve();
+        });
+      },
+    });
+
+    softkeysStore.setCenter({
+      label: "SELECT",
+      callback: () => {
+        return new Promise((resolve) => {
+          console.log("You clicked on SoftCenter");
+          resolve();
+        });
+      },
+    });
+
+    softkeysStore.setRight({
+      label: "Options",
+      callback: () => {
+        return new Promise((resolve) => {
+          console.log("You clicked on SoftRight");
+          resolve();
+        });
+      },
+    });
+  };
 
   const logout = async (): Promise<void> => {
     await authService.logout();
@@ -75,5 +110,5 @@
     </section>
   </main>
 
-  <SoftKeys />
+  <SoftKeys softkeys={$softkeysStore} />
 </div>
