@@ -49,11 +49,18 @@
       justify-content: space-between;
       background-color: #cccccc;
       color: #323232;
-      padding: 0 0.5rem 0 0.5rem;
+      padding: 0 0.25rem;
+      align-items: center;
 
       h5 {
-        margin: 0.25rem;
+        margin: 0.125rem 0;
         font-weight: 600;
+        cursor: pointer;
+      }
+
+      &-center {
+        padding-left: 1.5rem;
+        font-size: 1rem;
       }
     }
   }
@@ -62,17 +69,23 @@
 <footer class="footer">
   <div class="footer__softkeys">
     {#if softkeys.left}
-      <h5 on:click={keyDownHandler.bind(this, { key: 'SoftLeft' })}>
+      <h5
+        class="footer__softkeys-left"
+        on:click={keyDownHandler.bind(this, { key: 'SoftLeft' })}>
         {softkeys.left.label}
       </h5>
     {/if}
     {#if softkeys.center}
-      <h5 on:click={keyDownHandler.bind(this, { key: 'Enter' })}>
+      <h5
+        class="footer__softkeys-center"
+        on:click={keyDownHandler.bind(this, { key: 'Enter' })}>
         {softkeys.center.label}
       </h5>
     {/if}
     {#if softkeys.right}
-      <h5 on:click={keyDownHandler.bind(this, { key: 'SoftRight' })}>
+      <h5
+        class="footer__softkeys-right"
+        on:click={keyDownHandler.bind(this, { key: 'SoftRight' })}>
         {softkeys.right.label}
       </h5>
     {/if}

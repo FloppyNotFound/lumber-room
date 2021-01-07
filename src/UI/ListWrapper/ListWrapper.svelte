@@ -87,7 +87,7 @@
 
 <div>
   {#if hasFolders}
-    <p>Folders</p>
+    <h2>Folders</h2>
     {#each remoteFolders as folder, i (folder.id)}
       <button on:click={loadItems.bind(this, folder.path_lower)}>{i + 1}
         -
@@ -96,7 +96,7 @@
   {/if}
 
   {#if hasFiles}
-    <p>Files</p>
+    <h2>Files</h2>
     {#each remoteFiles as file, i (file.id)}{i + 1} - {file.name}{/each}
   {/if}
 
