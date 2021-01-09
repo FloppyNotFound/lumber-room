@@ -84,19 +84,6 @@
     main {
       text-align: center;
       padding: 1rem 0 2rem 0;
-
-      h1 {
-        color: red;
-        text-transform: uppercase;
-        font-size: 1rem;
-        font-weight: 600;
-      }
-    }
-
-    @media (min-width: 640px) {
-      main {
-        max-width: none;
-      }
     }
   }
 </style>
