@@ -35,7 +35,7 @@
   });
 
   const initSoftkeys = (): void => {
-    softkeysStore.setLeft({
+    /* softkeysStore.setLeft({
       label: "Back",
       callback: () => {
         return new Promise((resolve) => {
@@ -43,7 +43,7 @@
           resolve();
         });
       },
-    });
+    }); */
 
     softkeysStore.setCenter({
       label: "SELECT",
