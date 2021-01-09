@@ -1,8 +1,21 @@
 <script lang="ts">
+  import { onDestroy, onMount } from "svelte";
   import { SoftkeyBinding } from "./enums/softkey-binding.enum";
   import type { Softkeys } from "./models/softkeys.model";
+  import { softkeysStore } from "./softkeys-store";
 
-  export let softkeys: Softkeys = {};
+  let softkeys: Softkeys = {};
+
+  let unsubscribe: () => void;
+
+  onMount(
+    () =>
+      (unsubscribe = softkeysStore.subscribe(
+        (keys) => (softkeys = softkeys = keys)
+      ))
+  );
+
+  onDestroy(() => unsubscribe());
 
   const keyDownHandler = (evt: KeyboardEvent): void => {
     switch (evt.key) {

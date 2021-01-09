@@ -72,7 +72,7 @@
     authStore.set(void 0);
   };
 
-  const showListWrapperError = (msg: CustomEvent<ListWrapperError>) =>
+  const showListWrapperError = (msg: CustomEvent<ListWrapperError>): void =>
     toastStore.alert(msg.detail.message);
 </script>
 
@@ -121,5 +121,5 @@
 
   <button on:click={() => toastStore.alert('Ping')}>Show alert toast</button>
 
-  <SoftKeys softkeys={$softkeysStore} />
+  <SoftKeys />
 </div>
