@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
   import type {
     Dropbox,
     files,
@@ -8,6 +8,8 @@
     auth,
   } from "dropbox";
   import type { ListWrapperError } from "./models/list-wrapper-error.model";
+  import ListView from "./ListView/ListView.svelte";
+  import type { OpenFolderEventItem } from "./models/open-folder-event-item.model";
 
   export let accessToken: string;
 
@@ -16,17 +18,10 @@
   let isLoading: boolean;
   let listFolderResult: files.ListFolderResult;
 
-  $: hasFolders = !!remoteFolders?.length;
-  $: remoteFolders = <files.FolderMetadataReference[]>(
-    listFolderResult?.entries.filter((e) => e[".tag"] === "folder")
-  );
-  $: hasFiles = !!remoteFiles?.length;
-  $: remoteFiles = <files.FileMetadataReference[]>(
-    listFolderResult?.entries.filter((e) => e[".tag"] === "file")
-  );
+  onMount(() => loadItems());
 
-  $: hasMore = listFolderResult?.has_more;
-  $: cursor = listFolderResult?.cursor;
+  const loadItemsHandler = (event: CustomEvent<OpenFolderEventItem>) =>
+    loadItems(event.detail.path);
 
   const loadItems = async (path: string = ""): Promise<void> => {
     isLoading = true;
@@ -78,32 +73,8 @@
   };
 </script>
 
-<h2 data-l10n-id="list-wrapper-header">List Wrapper Header</h2>
-<button
-  on:click="{loadItems.bind(this, '')}"
-  disabled="{isLoading}"
-  data-l10n-id="list-wrapper-refresh-cta">Refresh</button>
-
-<div>
-  {#if hasFolders}
-    <h2>Folders</h2>
-    {#each remoteFolders as folder, i (folder.id)}
-      <button on:click="{loadItems.bind(this, folder.path_lower)}"
-        >{i + 1}
-        -
-        {folder.name}</button>
-    {/each}
-  {/if}
-
-  {#if hasFiles}
-    <h2>Files</h2>
-    {#each remoteFiles as file, i (file.id)}{i + 1} - {file.name}{/each}
-  {/if}
-
-  <!-- TODO: load more items -->
-  {#if hasMore}
-    There are more entries available, load them with cursor
-    {cursor}
-    [not implemented yet]
-  {/if}
-</div>
+{#if isLoading}
+  <div>Loading...</div>
+{:else}
+  <ListView items="{listFolderResult}" on:openfolder="{loadItemsHandler}" />
+{/if}
