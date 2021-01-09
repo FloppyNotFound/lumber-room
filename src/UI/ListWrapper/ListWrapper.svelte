@@ -9,7 +9,7 @@
   } from "dropbox";
   import type { ListWrapperError } from "./models/list-wrapper-error.model";
   import ListView from "./ListView/ListView.svelte";
-  import type { OpenFolderEventItem } from "./models/open-folder-event-item.model";
+  import type { OpenFolderEvent } from "./models/open-folder-event.model";
 
   export let accessToken: string;
 
@@ -20,7 +20,7 @@
 
   onMount(() => loadItems());
 
-  const loadItemsHandler = (event: CustomEvent<OpenFolderEventItem>) =>
+  const loadItemsHandler = (event: CustomEvent<OpenFolderEvent>) =>
     loadItems(event.detail.path);
 
   const loadItems = async (path: string = ""): Promise<void> => {

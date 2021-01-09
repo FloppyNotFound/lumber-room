@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { files } from "dropbox";
   import { createEventDispatcher } from "svelte";
+  import type { OpenFolderEvent } from "../models/open-folder-event.model";
 
   export let items: files.ListFolderResult;
 
@@ -20,7 +21,7 @@
   $: cursor = items?.cursor;
 
   const openFolderHandler = (path: string): void =>
-    dispach("openfolder", { path });
+    dispach("openfolder", <OpenFolderEvent>{ path });
 </script>
 
 <div>
