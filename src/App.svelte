@@ -7,7 +7,10 @@
   import ListWrapper from "./UI/ListWrapper/ListWrapper.svelte";
   import Header from "./UI/Header/Header.svelte";
   import SoftKeys from "./UI/SoftKeys/SoftKeys.svelte";
+  import Toast from "./UI/Toast/Toast.svelte";
   import { softkeysStore } from "./UI/SoftKeys/softkeys-store";
+  import { toastStore } from "./UI/Toast/toast-store";
+  import type { ListWrapperError } from "./UI/ListWrapper/models/list-wrapper-error.model";
 
   const clientId = "oejf5drg46j71z6";
 
@@ -64,9 +67,13 @@
   };
 
   const logout = async (): Promise<void> => {
+    toastStore.warn("Your session timed out, please re-login");
     await authService.logout();
     authStore.set(void 0);
   };
+
+  const showListWrapperError = (msg: CustomEvent<ListWrapperError>) =>
+    toastStore.alert(msg.detail.message);
 </script>
 
 <style lang="scss">
@@ -95,6 +102,8 @@
 </style>
 
 <div class="app-wrapper">
+  <Toast />
+
   <Header />
 
   <main>
@@ -102,10 +111,15 @@
       {#if !$authStore}
         <Auth {clientId} />
       {:else}
-        <ListWrapper accessToken={$authStore} on:autherror={logout} />
+        <ListWrapper
+          accessToken={$authStore}
+          on:autherror={logout}
+          on:error={showListWrapperError} />
       {/if}
     </section>
   </main>
+
+  <button on:click={() => toastStore.alert('Ping')}>Show alert toast</button>
 
   <SoftKeys softkeys={$softkeysStore} />
 </div>

@@ -7,6 +7,7 @@
     DropboxResponseError,
     auth,
   } from "dropbox";
+  import type { ListWrapperError } from "./models/list-wrapper-error.model";
 
   export let accessToken: string;
 
@@ -46,16 +47,16 @@
           isLoading = false;
 
           if (!errorResponse.error?.error) {
-            // TODO: show control instead of alert
-            alert(errorResponse.error);
+            dispatch("error", <ListWrapperError>{
+              message: <string>(<unknown>errorResponse.error),
+            });
             return;
           }
 
           const tag = errorResponse.error?.error[".tag"];
 
           if (errorResponse.status === 409 && tag === "path") {
-            // TODO: show control instead of alert
-            alert("Path not found");
+            dispatch("error", <ListWrapperError>{ message: "Path not found" });
             loadItems("");
             return;
           }
