@@ -1,3 +1,7 @@
+<header class="header">
+  <h1 class="header__content" data-l10n-id="app_title">APP_TITLE</h1>
+</header>
+
 <style lang="scss">
   .header {
     background-color: darkblue;
@@ -16,7 +20,3 @@
     }
   }
 </style>
-
-<header class="header">
-  <h1 class="header__content" data-l10n-id="app_title">APP_TITLE</h1>
-</header>

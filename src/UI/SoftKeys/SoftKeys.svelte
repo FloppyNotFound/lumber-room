@@ -49,6 +49,32 @@
   document.addEventListener("keydown", keyDownHandler);
 </script>
 
+<footer class="footer">
+  <div class="footer__softkeys">
+    {#if softkeys.left}
+      <h5
+        class="footer__softkeys-left"
+        on:click="{keyDownHandler.bind(this, { key: 'SoftLeft' })}">
+        {softkeys.left.label}
+      </h5>
+    {/if}
+    {#if softkeys.center}
+      <h5
+        class="footer__softkeys-center"
+        on:click="{keyDownHandler.bind(this, { key: 'Enter' })}">
+        {softkeys.center.label}
+      </h5>
+    {/if}
+    {#if softkeys.right}
+      <h5
+        class="footer__softkeys-right"
+        on:click="{keyDownHandler.bind(this, { key: 'SoftRight' })}">
+        {softkeys.right.label}
+      </h5>
+    {/if}
+  </div>
+</footer>
+
 <style lang="scss">
   .footer {
     width: 100%;
@@ -89,29 +115,3 @@
     }
   }
 </style>
-
-<footer class="footer">
-  <div class="footer__softkeys">
-    {#if softkeys.left}
-      <h5
-        class="footer__softkeys-left"
-        on:click={keyDownHandler.bind(this, { key: 'SoftLeft' })}>
-        {softkeys.left.label}
-      </h5>
-    {/if}
-    {#if softkeys.center}
-      <h5
-        class="footer__softkeys-center"
-        on:click={keyDownHandler.bind(this, { key: 'Enter' })}>
-        {softkeys.center.label}
-      </h5>
-    {/if}
-    {#if softkeys.right}
-      <h5
-        class="footer__softkeys-right"
-        on:click={keyDownHandler.bind(this, { key: 'SoftRight' })}>
-        {softkeys.right.label}
-      </h5>
-    {/if}
-  </div>
-</footer>

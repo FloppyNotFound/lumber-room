@@ -68,8 +68,6 @@
               "user_suspended",
             ].includes(tag)
           ) {
-            // TODO: show control instead of alert
-            alert("Your session has run out, you will be signed out");
             dispatch("autherror");
             return;
           }
@@ -82,15 +80,16 @@
 
 <h2 data-l10n-id="list-wrapper-header">List Wrapper Header</h2>
 <button
-  on:click={loadItems.bind(this, '')}
-  disabled={isLoading}
+  on:click="{loadItems.bind(this, '')}"
+  disabled="{isLoading}"
   data-l10n-id="list-wrapper-refresh-cta">Refresh</button>
 
 <div>
   {#if hasFolders}
     <h2>Folders</h2>
     {#each remoteFolders as folder, i (folder.id)}
-      <button on:click={loadItems.bind(this, folder.path_lower)}>{i + 1}
+      <button on:click="{loadItems.bind(this, folder.path_lower)}"
+        >{i + 1}
         -
         {folder.name}</button>
     {/each}

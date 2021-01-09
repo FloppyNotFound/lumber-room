@@ -26,6 +26,15 @@
   onDestroy(() => unsubscribe());
 </script>
 
+{#if isVisible}
+  <p
+    id="toast"
+    class="{toastClass}"
+    transition:fly="{{ y: -32, duration: 500 }}">
+    <span id="toast__content">{toastMessage}</span>
+  </p>
+{/if}
+
 <style lang="scss">
   #toast {
     z-index: 100;
@@ -59,9 +68,3 @@
     }
   }
 </style>
-
-{#if isVisible}
-  <p id="toast" class={toastClass} transition:fly={{ y: -32, duration: 500 }}>
-    <span id="toast__content">{toastMessage}</span>
-  </p>
-{/if}

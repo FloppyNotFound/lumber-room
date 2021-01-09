@@ -76,6 +76,29 @@
     toastStore.alert(msg.detail.message);
 </script>
 
+<div class="app-wrapper">
+  <Toast />
+
+  <Header />
+
+  <main>
+    <section>
+      {#if !$authStore}
+        <Auth clientId="{clientId}" />
+      {:else}
+        <ListWrapper
+          accessToken="{$authStore}"
+          on:autherror="{logout}"
+          on:error="{showListWrapperError}" />
+      {/if}
+    </section>
+  </main>
+
+  <button on:click="{() => toastStore.alert('Ping')}">Show alert toast</button>
+
+  <SoftKeys />
+</div>
+
 <style lang="scss">
   .app-wrapper {
     display: flex;
@@ -87,26 +110,3 @@
     }
   }
 </style>
-
-<div class="app-wrapper">
-  <Toast />
-
-  <Header />
-
-  <main>
-    <section>
-      {#if !$authStore}
-        <Auth {clientId} />
-      {:else}
-        <ListWrapper
-          accessToken={$authStore}
-          on:autherror={logout}
-          on:error={showListWrapperError} />
-      {/if}
-    </section>
-  </main>
-
-  <button on:click={() => toastStore.alert('Ping')}>Show alert toast</button>
-
-  <SoftKeys />
-</div>

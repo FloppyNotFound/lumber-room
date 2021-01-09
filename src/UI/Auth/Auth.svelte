@@ -33,7 +33,5 @@
 </script>
 
 <h2>Please login</h2>
-<button
-  id="login"
-  data-l10n-id="auth-login-cta"
-  on:click={loginRequested}>Login</button>
+<button id="login" data-l10n-id="auth-login-cta" on:click="{loginRequested}"
+  >Login</button>
