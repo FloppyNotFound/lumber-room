@@ -12,5 +12,7 @@
     color: $app-separator-forground;
     margin: 0;
     padding: 0.1rem 0 0.1rem 0.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 </style>

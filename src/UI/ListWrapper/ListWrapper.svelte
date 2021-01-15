@@ -12,6 +12,9 @@
   import type { OpenFolderEvent } from "./models/open-folder-event.model";
   import { softkeysStore } from "../SoftKeys/softkeys-store";
   import type { Softkey } from "../SoftKeys/models/softkey.model";
+  import type { DownloadImage } from "./models/download-image.model";
+  import Separator from "../Separator/Separator.svelte";
+  import { toastStore } from "../Toast/toast-store";
 
   export let accessToken: string;
 
@@ -23,7 +26,7 @@
   let isLoading: boolean;
   let listFolderResult: files.ListFolderResult;
 
-  let imageUrl: string;
+  let downloadImage: DownloadImage;
 
   let historyStack: string[] = [];
 
@@ -116,8 +119,16 @@
         console.log("downloaded", item);
         isLoading = false;
 
-        // @ts-ignore
-        imageUrl = getUrlFromBlob(item.result.fileBlob);
+        const mediaInfo = item.result.media_info;
+        if (mediaInfo && mediaInfo["metadata"][".tag"] === "photo") {
+          downloadImage = <DownloadImage>{
+            // @ts-ignore
+            src: getUrlFromBlob(item.result.fileBlob),
+            alt: item.result.name,
+          };
+        } else {
+          throw new Error("Unsupported file type");
+        }
       })
       .then(() => {
         softkeysStore.stack();
@@ -127,12 +138,16 @@
         softkeysStore.setLeft(<Softkey>{
           label: "Back",
           callback: () => {
-            imageUrl = void 0;
+            downloadImage = void 0;
             softkeysStore.pop();
           },
         });
       })
-      .catch(() => {
+      .catch((err) => {
+        if (err.message) {
+          toastStore.warn(err.message);
+        }
+
         isLoading = false;
       });
   };
@@ -147,9 +162,10 @@
 
 {#if isLoading}
   <div class="status-message">Loading...</div>
-{:else if imageUrl}
-  <div>
-    <img class="image" src="{imageUrl}" alt="some img" />
+{:else if downloadImage}
+  <div class="image-wrapper">
+    <Separator text="{downloadImage.alt}" />
+    <img class="image" src="{downloadImage.src}" alt="{downloadImage.alt}" />
   </div>
 {:else if listFolderResult?.entries.length}
   <ListView
@@ -169,7 +185,11 @@
     margin-top: 1rem;
   }
 
-  .image {
-    width: 100%;
+  .image-wrapper {
+    margin: 0 -0.5rem;
+
+    .image {
+      width: 100%;
+    }
   }
 </style>
