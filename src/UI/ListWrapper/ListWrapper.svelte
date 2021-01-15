@@ -170,7 +170,7 @@
   <div class="status-message">Loading...</div>
 {:else if downloadImage}
   <Image image="{downloadImage}" />
-{:else if listFolderResult.entries.length}
+{:else if listFolderResult && listFolderResult.entries.length}
   <ListView
     items="{listFolderResult}"
     on:openfolder="{loadItemsHandler}"
