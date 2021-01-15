@@ -22,8 +22,14 @@
   $: hasMore = items?.has_more;
   $: cursor = items?.cursor;
 
+  const getFileEnding = (file: files.FileMetadataReference) =>
+    file.name.toLowerCase();
+
   const openFolderHandler = (path: string): void =>
     dispach("openfolder", <OpenFolderEvent>{ path });
+
+  const getModifiedDate = (date: string): string =>
+    new Date(date).toDateString();
 </script>
 
 <div>
@@ -56,16 +62,22 @@
         <button class="listview-item">
           <div class="listview-item-content">
             <div class="col-1">
-              {#if file.name.endsWith(".pdf")}
+              {#if getFileEnding(file).endsWith(".pdf")}
                 <span class="icon-file-pdf"></span>
-                <!-- ToDo: Support more file types -->
+              {:else if getFileEnding(file).endsWith(".jpg")}
+                <span class="icon-file-picture"></span>
+                <!-- TODO: Support more file types -->
               {:else}
                 <span class="icon-file-empty"></span>
               {/if}
             </div>
             <div class="col-2">
               <div class="row-1">{file.name}</div>
-              <div class="row-2">{getFileSize(file.size)}</div>
+              <div class="row-2">
+                {getFileSize(file.size)} - {getModifiedDate(
+                  file.client_modified
+                )}
+              </div>
             </div>
           </div>
         </button>
