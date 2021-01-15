@@ -101,9 +101,19 @@
 </script>
 
 {#if isLoading}
-  <div>Loading...</div>
+  <div class="status-message">Loading...</div>
 {:else if listFolderResult?.entries.length}
   <ListView items="{listFolderResult}" on:openfolder="{loadItemsHandler}" />
 {:else}
-  <div>This folder is empty</div>
+  <div class="status-message">
+    <div>This folder is empty</div>
+  </div>
 {/if}
+
+<style lang="scss">
+  .status-message {
+    height: 100%;
+    text-align: center;
+    margin-top: 1rem;
+  }
+</style>
