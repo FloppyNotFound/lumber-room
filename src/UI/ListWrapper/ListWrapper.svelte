@@ -7,14 +7,15 @@
     DropboxResponseError,
     auth,
   } from "dropbox";
-  import type { ListWrapperError } from "./models/list-wrapper-error.model";
+  import type { ListWrapperToast } from "./models/list-wrapper-toast.model";
   import ListView from "./ListView/ListView.svelte";
   import type { OpenFolderEvent } from "./models/open-folder-event.model";
   import { softkeysStore } from "../SoftKeys/softkeys-store";
   import type { Softkey } from "../SoftKeys/models/softkey.model";
   import type { DownloadImage } from "./models/download-image.model";
   import Image from "../Image/Image.svelte";
-  import { toastStore } from "../Toast/toast-store";
+  import checkIsAuthError from "./helpers/check-is-auth-error";
+  import getUrlFromBlob from "./helpers/get-url-from-blob";
 
   export let accessToken: string;
 
@@ -34,6 +35,7 @@
 
   onMount(() => loadItems());
 
+  //#region Load Items
   const loadItemsHandler = (event: CustomEvent<OpenFolderEvent>) =>
     loadItems(event.detail.path);
 
@@ -75,7 +77,7 @@
           isLoading = false;
 
           if (!errorResponse.error?.error) {
-            dispatch("error", <ListWrapperError>{
+            dispatch("error", <ListWrapperToast>{
               message: <string>(<unknown>errorResponse.error),
             });
             return;
@@ -84,18 +86,12 @@
           const tag = errorResponse.error?.error[".tag"];
 
           if (errorResponse.status === 409 && tag === "path") {
-            dispatch("error", <ListWrapperError>{ message: "Path not found" });
+            dispatch("error", <ListWrapperToast>{ message: "Path not found" });
             loadItems("");
             return;
           }
 
-          if (
-            [
-              "invalid_access_token",
-              "expired_access_token",
-              "user_suspended",
-            ].includes(tag)
-          ) {
+          if (checkIsAuthError(errorResponse)) {
             dispatch("autherror");
             return;
           }
@@ -104,7 +100,9 @@
         }
       );
   };
+  //#endregion
 
+  //#region Load Item
   const loadItemHandler = (event: CustomEvent<OpenFolderEvent>) =>
     downloadItem(event.detail.path);
 
@@ -131,32 +129,40 @@
         }
       })
       .then(() => {
-        softkeysStore.stack();
-
-        softkeysStore.setRight();
-        softkeysStore.setCenter();
-        softkeysStore.setLeft(<Softkey>{
-          label: "Back",
-          callback: () => {
-            downloadImage = void 0;
-            softkeysStore.pop();
-          },
-        });
+        prepareSoftkeysForSubpage();
       })
-      .catch((err) => {
-        if (err.message) {
-          toastStore.warn(err.message);
+      .catch((errorResponse) => {
+        if (checkIsAuthError(errorResponse)) {
+          dispatch("autherror");
+          return;
         }
 
-        isLoading = false;
-      });
+        throw errorResponse;
+      })
+      .catch((err: Error<string> | unknown) => {
+        if (err instanceof Error) {
+          dispatch("warn", <ListWrapperToast>{ message: err.message });
+          return;
+        }
+
+        throw err;
+      })
+      .then(() => (isLoading = false));
   };
+  //#endregion
 
-  const getUrlFromBlob = (blob: Blob): string => {
-    const urlCreator = window.URL || window.webkitURL;
-    const imageUrl = urlCreator.createObjectURL(blob);
+  const prepareSoftkeysForSubpage = (): void => {
+    softkeysStore.stack();
 
-    return imageUrl;
+    softkeysStore.setRight();
+    softkeysStore.setCenter();
+    softkeysStore.setLeft({
+      label: "Back",
+      callback: () => {
+        downloadImage = void 0;
+        softkeysStore.pop();
+      },
+    } as Softkey);
   };
 </script>
 

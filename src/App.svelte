@@ -10,7 +10,7 @@
   import Toast from "./UI/Toast/Toast.svelte";
   import { softkeysStore } from "./UI/SoftKeys/softkeys-store";
   import { toastStore } from "./UI/Toast/toast-store";
-  import type { ListWrapperError } from "./UI/ListWrapper/models/list-wrapper-error.model";
+  import type { ListWrapperToast } from "./UI/ListWrapper/models/list-wrapper-toast.model";
 
   const clientId = "oejf5drg46j71z6";
 
@@ -72,7 +72,10 @@
     authStore.set(void 0);
   };
 
-  const showListWrapperError = (msg: CustomEvent<ListWrapperError>): void =>
+  const showListWrapperWarning = (msg: CustomEvent<ListWrapperToast>): void =>
+    toastStore.warn(msg.detail.message);
+
+  const showListWrapperError = (msg: CustomEvent<ListWrapperToast>): void =>
     toastStore.alert(msg.detail.message);
 </script>
 
@@ -89,6 +92,7 @@
         <ListWrapper
           accessToken="{$authStore}"
           on:autherror="{logout}"
+          on:warn="{showListWrapperWarning}"
           on:error="{showListWrapperError}" />
       {/if}
     </section>
