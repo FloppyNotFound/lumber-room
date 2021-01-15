@@ -7,14 +7,14 @@
 
 <div class="image-wrapper">
   <Separator text="{image.alt}" />
-  <img class="image" src="{image.src}" alt="{image.alt}" />
+  <img class="image-wrapper__image" src="{image.src}" alt="{image.alt}" />
 </div>
 
 <style lang="scss">
   .image-wrapper {
     margin: 0 -0.5rem;
 
-    .image {
+    &__image {
       width: 100%;
     }
   }
