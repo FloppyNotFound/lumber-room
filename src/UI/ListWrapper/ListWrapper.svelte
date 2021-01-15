@@ -11,6 +11,7 @@
   import ListView from "./ListView/ListView.svelte";
   import type { OpenFolderEvent } from "./models/open-folder-event.model";
   import { softkeysStore } from "../SoftKeys/softkeys-store";
+  import type { Softkey } from "../SoftKeys/models/softkey.model";
 
   export let accessToken: string;
 
@@ -117,6 +118,19 @@
 
         // @ts-ignore
         imageUrl = getUrlFromBlob(item.result.fileBlob);
+      })
+      .then(() => {
+        softkeysStore.stack();
+
+        softkeysStore.setRight();
+        softkeysStore.setCenter();
+        softkeysStore.setLeft(<Softkey>{
+          label: "Back",
+          callback: () => {
+            imageUrl = void 0;
+            softkeysStore.pop();
+          },
+        });
       })
       .catch(() => {
         isLoading = false;
