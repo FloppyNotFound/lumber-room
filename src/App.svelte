@@ -94,8 +94,6 @@
     </section>
   </main>
 
-  <button on:click="{() => toastStore.alert('Ping')}">Show alert toast</button>
-
   <SoftKeys />
 </div>
 
@@ -105,8 +103,7 @@
     flex-direction: column;
 
     main {
-      text-align: center;
-      padding: 1rem 0 2rem 0;
+      padding: 0.7rem 0 2rem 0;
     }
   }
 </style>

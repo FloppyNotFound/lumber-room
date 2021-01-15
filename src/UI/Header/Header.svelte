@@ -3,9 +3,11 @@
 </header>
 
 <style lang="scss">
+  @import "../../styles/colors.scss";
+
   .header {
-    background-color: darkblue;
-    color: yellow;
+    background-color: $app-background;
+    color: $app-foreground;
     position: fixed;
     top: 0;
     left: 0;

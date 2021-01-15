@@ -102,6 +102,8 @@
 
 {#if isLoading}
   <div>Loading...</div>
-{:else}
+{:else if listFolderResult?.entries.length}
   <ListView items="{listFolderResult}" on:openfolder="{loadItemsHandler}" />
+{:else}
+  <div>This folder is empty</div>
 {/if}
