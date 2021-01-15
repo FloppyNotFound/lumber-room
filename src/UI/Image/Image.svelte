@@ -7,9 +7,7 @@
 
 <div class="image-wrapper">
   <Separator text="{image.alt}" />
-  {#if image}
-    <img class="image" src="{image.src}" alt="{image.alt}" />
-  {/if}
+  <img class="image" src="{image.src}" alt="{image.alt}" />
 </div>
 
 <style lang="scss">
