@@ -13,7 +13,7 @@
   import { softkeysStore } from "../SoftKeys/softkeys-store";
   import type { Softkey } from "../SoftKeys/models/softkey.model";
   import type { DownloadImage } from "./models/download-image.model";
-  import Separator from "../Separator/Separator.svelte";
+  import Image from "../Image/Image.svelte";
   import { toastStore } from "../Toast/toast-store";
 
   export let accessToken: string;
@@ -163,10 +163,7 @@
 {#if isLoading}
   <div class="status-message">Loading...</div>
 {:else if downloadImage}
-  <div class="image-wrapper">
-    <Separator text="{downloadImage.alt}" />
-    <img class="image" src="{downloadImage.src}" alt="{downloadImage.alt}" />
-  </div>
+  <Image image="{downloadImage}" />
 {:else if listFolderResult?.entries.length}
   <ListView
     items="{listFolderResult}"
@@ -183,13 +180,5 @@
     height: 100%;
     text-align: center;
     margin-top: 1rem;
-  }
-
-  .image-wrapper {
-    margin: 0 -0.5rem;
-
-    .image {
-      width: 100%;
-    }
   }
 </style>

@@ -1,0 +1,23 @@
+<script lang="ts">
+  import type { DownloadImage } from "../ListWrapper/models/download-image.model";
+  import Separator from "../Separator/Separator.svelte";
+
+  export let image: DownloadImage;
+</script>
+
+<div class="image-wrapper">
+  <Separator text="{image.alt}" />
+  {#if image}
+    <img class="image" src="{image.src}" alt="{image.alt}" />
+  {/if}
+</div>
+
+<style lang="scss">
+  .image-wrapper {
+    margin: 0 -0.5rem;
+
+    .image {
+      width: 100%;
+    }
+  }
+</style>
