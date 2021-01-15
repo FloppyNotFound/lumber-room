@@ -16,8 +16,13 @@
 
   const dispatch = createEventDispatcher();
 
+  // @ts-ignore
+  const dbx = new Dropbox.Dropbox({ accessToken });
+
   let isLoading: boolean;
   let listFolderResult: files.ListFolderResult;
+
+  let imageUrl: string;
 
   let historyStack: string[] = [];
 
@@ -33,9 +38,6 @@
     isNavBack = false
   ): Promise<void> => {
     isLoading = true;
-
-    // @ts-ignore
-    const dbx = new Dropbox.Dropbox({ accessToken });
 
     await (<Dropbox>dbx)
       .filesListFolder({ path, include_media_info: true })
@@ -98,12 +100,48 @@
         }
       );
   };
+
+  const loadItemHandler = (event: CustomEvent<OpenFolderEvent>) =>
+    downloadItem(event.detail.path);
+
+  const downloadItem = async (path: string): Promise<void> => {
+    isLoading = true;
+
+    const downloadArgs = <files.DownloadArg>{ path };
+
+    await (<Dropbox>dbx)
+      .filesDownload(downloadArgs)
+      .then((item) => {
+        console.log("downloaded", item);
+        isLoading = false;
+
+        // @ts-ignore
+        imageUrl = getUrlFromBlob(item.result.fileBlob);
+      })
+      .catch(() => {
+        isLoading = false;
+      });
+  };
+
+  const getUrlFromBlob = (blob: Blob): string => {
+    const urlCreator = window.URL || window.webkitURL;
+    const imageUrl = urlCreator.createObjectURL(blob);
+
+    return imageUrl;
+  };
 </script>
 
 {#if isLoading}
   <div class="status-message">Loading...</div>
+{:else if imageUrl}
+  <div>
+    <img class="image" src="{imageUrl}" alt="some img" />
+  </div>
 {:else if listFolderResult?.entries.length}
-  <ListView items="{listFolderResult}" on:openfolder="{loadItemsHandler}" />
+  <ListView
+    items="{listFolderResult}"
+    on:openfolder="{loadItemsHandler}"
+    on:openfile="{loadItemHandler}" />
 {:else}
   <div class="status-message">
     <div>This folder is empty</div>
@@ -115,5 +153,9 @@
     height: 100%;
     text-align: center;
     margin-top: 1rem;
+  }
+
+  .image {
+    width: 100%;
   }
 </style>

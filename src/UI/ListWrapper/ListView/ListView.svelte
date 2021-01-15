@@ -28,6 +28,9 @@
   const openFolderHandler = (path: string): void =>
     dispach("openfolder", <OpenFolderEvent>{ path });
 
+  const openFileHandler = (path: string): void =>
+    dispach("openfile", <OpenFolderEvent>{ path });
+
   const getModifiedDate = (date: string): string =>
     new Date(date).toDateString();
 </script>
@@ -59,7 +62,9 @@
 
     {#each remoteFiles as file, _ (file.id)}
       <div class="listview-item-wrapper">
-        <button class="listview-item">
+        <button
+          class="listview-item"
+          on:click="{openFileHandler.bind(this, file.path_lower)}">
           <div class="listview-item-content">
             <div class="col-1">
               {#if getFileEnding(file).endsWith(".pdf")}
