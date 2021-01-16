@@ -9,13 +9,13 @@
   } from "dropbox";
   import type { ListWrapperToast } from "./models/list-wrapper-toast.model";
   import ListView from "./ListView/ListView.svelte";
-  import type { OpenFolderEvent } from "./models/open-folder-event.model";
   import { softkeysStore } from "../SoftKeys/softkeys-store";
   import type { Softkey } from "../SoftKeys/models/softkey.model";
   import type { DownloadImage } from "./models/download-image.model";
   import Image from "../Image/Image.svelte";
   import checkIsAuthError from "./helpers/check-is-auth-error";
   import getUrlFromBlob from "./helpers/get-url-from-blob";
+  import type { OpenFileFolderEvent } from "./models/open-file-folder-event.model";
 
   export let accessToken: string;
 
@@ -36,7 +36,7 @@
   onMount(() => loadItems());
 
   //#region Load Items
-  const loadItemsHandler = (event: CustomEvent<OpenFolderEvent>) =>
+  const loadItemsHandler = (event: CustomEvent<OpenFileFolderEvent>) =>
     loadItems(event.detail.path);
 
   const loadItems = async (
@@ -103,7 +103,7 @@
   //#endregion
 
   //#region Load Item
-  const loadItemHandler = (event: CustomEvent<OpenFolderEvent>) =>
+  const loadItemHandler = (event: CustomEvent<OpenFileFolderEvent>) =>
     downloadItem(event.detail.path);
 
   const downloadItem = async (path: string): Promise<void> => {

@@ -85,7 +85,7 @@
   <Header />
 
   <main>
-    <section>
+    <section style="margin-top: 0.3rem">
       {#if !$authStore}
         <Auth clientId="{clientId}" />
       {:else}
