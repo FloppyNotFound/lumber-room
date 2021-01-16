@@ -112,7 +112,7 @@
       margin-top: 0.9rem;
 
       section {
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
       }
     }
   }
