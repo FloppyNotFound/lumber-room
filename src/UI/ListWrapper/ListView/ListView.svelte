@@ -37,7 +37,9 @@
 
 <div>
   {#if hasFolders}
-    <div class="seperator-wrapper"><Separator text="{'Folders'}" /></div>
+    <div class="folder-header">
+      <Separator text="{'Folders'}" />
+    </div>
 
     {#each remoteFolders as folder, _ (folder.id)}
       <div class="listview-item-wrapper">
@@ -58,7 +60,9 @@
   {/if}
 
   {#if hasFiles}
-    <div class="seperator-wrapper"><Separator text="{'Files'}" /></div>
+    <div class="files-header">
+      <Separator text="{'Files'}" />
+    </div>
 
     {#each remoteFiles as file, _ (file.id)}
       <div class="listview-item-wrapper">
@@ -101,7 +105,10 @@
 <style lang="scss">
   @import "../../../styles/colors.scss";
 
-  .seperator-wrapper {
+  .folder-header {
+    margin: 0.3rem -0.5rem 0 -0.5rem;
+  }
+  .files-header {
     margin: 0 -0.5rem;
   }
 
