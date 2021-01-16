@@ -18,7 +18,8 @@
   "permissions": {
     "systemXHR": {
       "description": "Required to load remote content"
-    }
+    },
+    "spatialnavigation-app-manage": {}
   },
   "redirects": [
     {
