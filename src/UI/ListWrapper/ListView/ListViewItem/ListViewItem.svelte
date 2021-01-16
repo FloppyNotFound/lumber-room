@@ -5,6 +5,7 @@
   import type { FileFolder } from "./models/file-folder.interface";
 
   export let item: FileFolder;
+  export let tabIndex: number;
 
   $: isFolder = item.isFolder;
 
@@ -26,6 +27,7 @@
 </script>
 
 <button
+  tabindex="{tabIndex}"
   class="list-view-item"
   on:click="{clickButtonHandler.bind(this, item.path)}">
   <div class="list-view-item-content">

@@ -20,6 +20,7 @@
 
   $: hasFolders = !!remoteFolders?.length;
   $: hasFiles = !!remoteFiles?.length;
+  $: amountFolders = remoteFolders?.length;
 
   $: hasMore = items?.has_more;
   $: cursor = items?.cursor;
@@ -50,8 +51,8 @@
     <Separator text="{'Folders'}" />
 
     <div class="list-view-items">
-      {#each remoteFolders as folder, _ (folder.id)}
-        <ListViewItem item="{folder}" on:openfile on:openfolder />
+      {#each remoteFolders as folder, i (folder.id)}
+        <ListViewItem item="{folder}" tabIndex="{i}" on:openfolder />
       {/each}
     </div>
   {/if}
@@ -60,8 +61,11 @@
     <Separator text="{'Files'}" />
 
     <div class="list-view-items">
-      {#each remoteFiles as file, _ (file.id)}
-        <ListViewItem item="{file}" on:openfile />
+      {#each remoteFiles as file, i (file.id)}
+        <ListViewItem
+          item="{file}"
+          tabIndex="{amountFolders + i}"
+          on:openfile />
       {/each}
     </div>
   {/if}

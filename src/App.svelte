@@ -7,6 +7,7 @@
   import ListWrapper from "./UI/ListWrapper/ListWrapper.svelte";
   import Header from "./UI/Header/Header.svelte";
   import SoftKeys from "./UI/SoftKeys/SoftKeys.svelte";
+  import DPad from "./UI/DPad/DPad.svelte";
   import Toast from "./UI/Toast/Toast.svelte";
   import { softkeysStore } from "./UI/SoftKeys/softkeys-store";
   import { toastStore } from "./UI/Toast/toast-store";
@@ -99,6 +100,7 @@
   </main>
 
   <SoftKeys />
+  <DPad className="{'list-view-item'}" correction="{-46}" />
 </div>
 
 <style lang="scss">
@@ -107,8 +109,11 @@
     flex-direction: column;
 
     main {
-      padding: 0.7rem 0 2rem 0;
-      margin-top: 0.2rem;
+      margin-top: 0.9rem;
+
+      section {
+        margin-bottom: 2rem;
+      }
     }
   }
 </style>
