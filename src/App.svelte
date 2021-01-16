@@ -85,7 +85,7 @@
   <Header />
 
   <main>
-    <section style="margin-top: 0.3rem">
+    <section>
       {#if !$authStore}
         <Auth clientId="{clientId}" />
       {:else}
@@ -108,6 +108,7 @@
 
     main {
       padding: 0.7rem 0 2rem 0;
+      margin-top: 0.2rem;
     }
   }
 </style>

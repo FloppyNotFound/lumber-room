@@ -2,14 +2,20 @@
   import type { files } from "dropbox";
   import Separator from "../../Separator/Separator.svelte";
   import ListViewItem from "./ListViewItem/ListViewItem.svelte";
+  import type { FileFolder } from "./ListViewItem/models/file-folder.interface";
 
   export let items: files.ListFolderResult;
 
-  $: remoteFolders = <files.FolderMetadataReference[]>(
-    items?.entries.filter((e) => e[".tag"] === "folder")
+  $: remoteFolders = <FileFolder[]>(
+    (<files.FolderMetadataReference[]>(
+      items?.entries.filter((e) => e[".tag"] === "folder")
+    )).map((folder) => toFolderModel(folder))
   );
-  $: remoteFiles = <files.FileMetadataReference[]>(
-    items?.entries.filter((e) => e[".tag"] === "file")
+
+  $: remoteFiles = <FileFolder[]>(
+    (<files.FileMetadataReference[]>(
+      items?.entries.filter((e) => e[".tag"] === "file")
+    )).map((file) => toFileModel(file))
   );
 
   $: hasFolders = !!remoteFolders?.length;
@@ -17,6 +23,26 @@
 
   $: hasMore = items?.has_more;
   $: cursor = items?.cursor;
+
+  const toFileModel = (file: files.FileMetadataReference): FileFolder => {
+    return <FileFolder>{
+      id: file.id,
+      name: file.name,
+      path: file.path_lower,
+      sizeBytes: file.size,
+      lastModified: file.client_modified,
+      isFolder: false,
+    };
+  };
+
+  const toFolderModel = (folder: files.FolderMetadataReference): FileFolder => {
+    return <FileFolder>{
+      id: folder.id,
+      name: folder.name,
+      path: folder.path_lower,
+      isFolder: true,
+    };
+  };
 </script>
 
 <div class="list-wrapper">
@@ -25,11 +51,7 @@
 
     <div class="list-view-items">
       {#each remoteFolders as folder, _ (folder.id)}
-        <ListViewItem
-          item="{folder}"
-          isFolder="{true}"
-          on:openfile
-          on:openfolder />
+        <ListViewItem item="{folder}" on:openfile on:openfolder />
       {/each}
     </div>
   {/if}

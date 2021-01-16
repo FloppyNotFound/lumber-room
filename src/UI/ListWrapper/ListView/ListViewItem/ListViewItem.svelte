@@ -1,13 +1,13 @@
 <script lang="ts">
-  import type { files } from "dropbox";
   import type { OpenFileFolderEvent } from "../../models/open-file-folder-event.model";
   import { createEventDispatcher } from "svelte";
   import getFileSize from "./helpers/get-file-size";
+  import type { FileFolder } from "./models/file-folder.interface";
 
-  export let item: files.FileMetadataReference | files.FolderMetadataReference;
-  export let isFolder: boolean;
+  export let item: FileFolder;
 
-  $: file = <files.FileMetadataReference>item;
+  $: isFolder = item.isFolder;
+
   $: clickButtonHandler = (path: string): void =>
     isFolder ? openFolderHandler(path) : openFileHandler(path);
 
@@ -22,14 +22,12 @@
   const getModifiedDate = (date: string): string =>
     new Date(date).toDateString();
 
-  const getFileEnding = (
-    file: files.FileMetadataReference | files.FolderMetadataReference
-  ) => file.name.toLowerCase();
+  const getFileEnding = (file: FileFolder) => file.name.toLowerCase();
 </script>
 
 <button
   class="list-view-item"
-  on:click="{clickButtonHandler.bind(this, item.path_lower)}">
+  on:click="{clickButtonHandler.bind(this, item.path)}">
   <div class="list-view-item-content">
     {#if isFolder}
       <div class="col-1">
@@ -52,7 +50,7 @@
       <div class="col-2">
         <div class="row-1">{item.name}</div>
         <div class="row-2">
-          {getFileSize(file.size)} - {getModifiedDate(file.client_modified)}
+          {getFileSize(item.sizeBytes)} - {getModifiedDate(item.lastModified)}
         </div>
       </div>
     {/if}
