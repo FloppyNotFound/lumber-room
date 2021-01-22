@@ -14,11 +14,12 @@
     "url": "https://github.com/FloppyNotFound"
   },
   "type": "privileged",
-  "cursor": true,
+  "cursor": false,
   "permissions": {
     "systemXHR": {
       "description": "Required to load remote content"
-    }
+    },
+    "spatialnavigation-app-manage": {}
   },
   "redirects": [
     {
