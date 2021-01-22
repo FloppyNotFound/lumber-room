@@ -116,10 +116,10 @@
   .app-wrapper {
     display: flex;
     flex-direction: column;
+    margin-top: -0.5rem;
 
     main {
-      margin-top: 0.9rem;
-
+      margin-top: 1.25rem;
       section {
         margin-bottom: 1.5rem;
       }
