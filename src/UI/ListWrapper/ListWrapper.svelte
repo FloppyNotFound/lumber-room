@@ -16,6 +16,7 @@
   import Image from "../Image/Image.svelte";
   import checkIsAuthError from "./helpers/check-is-auth-error";
   import getUrlFromBlob from "./helpers/get-url-from-blob";
+  import imageZoomStore from "../Image/image-zoom-store";
 
   export let accessToken: string;
 
@@ -154,7 +155,16 @@
   const prepareSoftkeysForSubpage = (): void => {
     softkeysStore.stack();
 
-    softkeysStore.setRight();
+    softkeysStore.setRight({
+      label: "Zoom",
+      callback: () => {
+        return new Promise((resolve) => {
+          imageZoomStore.update((isZoomed) => !isZoomed);
+          resolve();
+        });
+      },
+    });
+
     softkeysStore.setCenter();
     softkeysStore.setLeft({
       label: "Back",
