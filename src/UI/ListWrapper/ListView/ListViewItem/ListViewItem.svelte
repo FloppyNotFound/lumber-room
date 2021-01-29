@@ -24,6 +24,15 @@
     new Date(date).toDateString();
 
   const getFileEnding = (file: FileFolder) => file.name.toLowerCase();
+
+  /**
+   * @see https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types
+   * @param file
+   */
+  const checkIsImage = (file: FileFolder) =>
+    ["jpg", "jpeg", "jfif", "pjpeg", "pjp", "png"].includes(
+      getFileEnding(file).split(".").pop().toLowerCase()
+    );
 </script>
 
 <button
@@ -42,10 +51,10 @@
       <div class="col-1">
         {#if getFileEnding(item).endsWith(".pdf")}
           <span class="icon-file-pdf"></span>
-        {:else if getFileEnding(item).endsWith(".jpg")}
+        {:else if checkIsImage(item)}
           <span class="icon-file-picture"></span>
-          <!-- TODO: Support more file types -->
         {:else}
+          <!-- TODO: Support more file types -->
           <span class="icon-file-empty"></span>
         {/if}
       </div>

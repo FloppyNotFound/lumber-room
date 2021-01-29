@@ -115,11 +115,10 @@
     await (<Dropbox>dbx)
       .filesDownload(downloadArgs)
       .then((item) => {
-        console.log("downloaded", item);
+        console.log("downloaded", item, item.result.is_downloadable);
         isLoading = false;
 
-        const mediaInfo = item.result.media_info;
-        if (mediaInfo && mediaInfo["metadata"][".tag"] === "photo") {
+        if (item.result.is_downloadable) {
           downloadImage = <DownloadImage>{
             // @ts-ignore
             src: getUrlFromBlob(item.result.fileBlob),
