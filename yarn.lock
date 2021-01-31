@@ -364,10 +364,10 @@ dexie@^3.0.3:
   resolved "https://registry.yarnpkg.com/dexie/-/dexie-3.0.3.tgz#ede63849dfe5f07e13e99bb72a040e8ac1d29dab"
   integrity sha512-BSFhGpngnCl1DOr+8YNwBDobRMH0ziJs2vts69VilwetHYOtEDcLqo7d/XiIphM0tJZ2rPPyAGd31lgH2Ln3nw==
 
-dropbox@^8.2.0:
-  version "8.2.0"
-  resolved "https://registry.yarnpkg.com/dropbox/-/dropbox-8.2.0.tgz#b3d2244424685d978761e3a9aea34625eb9422a3"
-  integrity sha512-lA/Bb7ZWPaeDK+S4AIeAAlPc49nwbrTlgMSLO5Nghg6FfhqhAKdICtpENviwb0YT1Zgn1NmYk1LCJfiyrJ7lVQ==
+dropbox@9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/dropbox/-/dropbox-9.0.0.tgz#14bfd178f3b115133387ad67f0f9c925be1206ff"
+  integrity sha512-2dWrG7Nn6Quakt+TVIYxn8xAkQ4AQKn918eXS//8svHN4rXFgHcXnhaNytXD6Uxjkh34poNawIaTaPE7TLUnGw==
   dependencies:
     node-fetch "^2.6.1"
 

@@ -1,8 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import parseAuthQueryString from "./UI/Auth/helpers/parse-auth-query-string";
   import { authStore } from "./UI/Auth/auth-store";
-  import { AuthService } from "./DAL/services/auth.service";
+  import { AuthDbService } from "./DAL/services/auth-db.service";
   import Auth from "./UI/Auth/Auth.svelte";
   import ListWrapper from "./UI/ListWrapper/ListWrapper.svelte";
   import Header from "./UI/Header/Header.svelte";
@@ -12,36 +11,62 @@
   import { softkeysStore } from "./UI/SoftKeys/softkeys-store";
   import { toastStore } from "./UI/Toast/toast-store";
   import type { ListWrapperToast } from "./UI/ListWrapper/models/list-wrapper-toast.model";
+  import getQueryVariable from "./UI/Auth/helpers/get-query-variable";
+  import { AuthService } from "./UI/Auth/services/auth.service";
 
   const clientId = "oejf5drg46j71z6";
 
-  const authService = new AuthService();
+  const authDbService = new AuthDbService();
+
+  let isLoginRequired: boolean;
 
   onMount(async () => {
-    const parsedAuthString = parseAuthQueryString(window.location.hash);
-    const newAccessToken = parsedAuthString["access_token"];
-    const newAccessTokenExpiresInXSeconds =
-      parsedAuthString["expires_in"] ?? "0";
+    const accessToken = await authDbService.getAccessToken();
 
-    const accessToken = await (!newAccessToken
-      ? authService.getAccessToken()
-      : authService.setAccessToken(
-          newAccessToken,
-          newAccessTokenExpiresInXSeconds
-        ));
+    // Check if access token is cached and still valid, if not, refresh access token
+    if (accessToken) {
+      authStore.set(accessToken);
+      initSoftkeys();
+      return;
+    }
 
-    authStore.set(accessToken);
-
-    initSoftkeys();
+    const codeVerifier = await authDbService.getCodeVerifier();
+    console.log("cached code verifier", codeVerifier);
 
     // Cursor is needed for Dropbox login
-    if (!accessToken) {
+    if (!codeVerifier) {
       // @ts-ignore
       navigator.spatialNavigationEnabled = true;
-    } else {
-      // @ts-ignore
-      navigator.spatialNavigationEnabled = false;
+      isLoginRequired = true;
+      return;
     }
+
+    let code = getQueryVariable(window.location.search.substring(1), "code");
+    if (!code) {
+      // Request new code
+      throw Error("Auth error");
+    }
+
+    // @ts-ignore
+    navigator.spatialNavigationEnabled = false;
+    const authService = new AuthService(clientId, codeVerifier);
+    console.log(authService);
+
+    await authService.getAuthenticationUrl();
+    authService.setCodeVerifier(codeVerifier);
+    const newAccessToken = await authService.requestAccessToken(code);
+
+    console.log("new access token", newAccessToken);
+
+    // todo
+    authDbService.setAccessToken(<string>newAccessToken, 0);
+    /* authService.setAccessToken(
+          newAccessToken,
+          newAccessTokenExpiresInXSeconds
+        ) */
+
+    authStore.set(accessToken);
+    initSoftkeys();
   });
 
   const initSoftkeys = (): void => {
@@ -76,9 +101,19 @@
     });
   };
 
+  const login = async (
+    codeVerifierEvent: CustomEvent<{ codeVerifier: string; authLink: string }>
+  ): Promise<void> => {
+    console.log("save code verifier to db");
+
+    await authDbService.setCodeVerifier(codeVerifierEvent.detail.codeVerifier);
+
+    document.location.href = codeVerifierEvent.detail.authLink;
+  };
+
   const logout = async (): Promise<void> => {
     toastStore.warn("Your session timed out, please re-login");
-    await authService.logout();
+    await authDbService.logout();
     authStore.set(void 0);
   };
 
@@ -96,8 +131,10 @@
 
   <main>
     <section>
-      {#if !$authStore}
-        <Auth clientId="{clientId}" />
+      {#if isLoginRequired && !$authStore}
+        <Auth clientId="{clientId}" on:login="{login}" />
+      {:else if !$authStore}
+        <div>Authenticating...</div>
       {:else}
         <ListWrapper
           accessToken="{$authStore}"

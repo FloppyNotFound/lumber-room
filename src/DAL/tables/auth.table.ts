@@ -1,5 +1,6 @@
 export interface AuthTable {
   id?: number;
-  accessToken: string;
-  validUntil: Date;
+  codeVerifier?: string;
+  accessToken?: string;
+  accessTokenValidUntil?: Date;
 }
