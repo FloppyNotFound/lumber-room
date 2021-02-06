@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
   import type {
     Dropbox,
     files,
@@ -7,36 +7,67 @@
     DropboxResponseError,
     auth,
   } from "dropbox";
-  import type { ListWrapperError } from "./models/list-wrapper-error.model";
+  import type { ListWrapperToast } from "./models/list-wrapper-toast.model";
+  import ListView from "./ListView/ListView.svelte";
+  import { softkeysStore } from "../SoftKeys/softkeys-store";
+  import type { Softkey } from "../SoftKeys/models/softkey.model";
+  import type { DownloadImage } from "./models/download-image.model";
+  import Image from "../Image/Image.svelte";
+  import checkIsAuthError from "./helpers/check-is-auth-error";
+  import getUrlFromBlob from "./helpers/get-url-from-blob";
+  import imageZoomStore from "../Image/image-zoom-store";
+  import type { OpenFileFolderEvent } from "./models/open-file-folder-event.model";
 
   export let accessToken: string;
 
   const dispatch = createEventDispatcher();
 
+  // @ts-ignore
+  const dbx = new Dropbox.Dropbox({ accessToken });
+
   let isLoading: boolean;
   let listFolderResult: files.ListFolderResult;
 
-  $: hasFolders = !!remoteFolders?.length;
-  $: remoteFolders = <files.FolderMetadataReference[]>(
-    listFolderResult?.entries.filter((e) => e[".tag"] === "folder")
-  );
-  $: hasFiles = !!remoteFiles?.length;
-  $: remoteFiles = <files.FileMetadataReference[]>(
-    listFolderResult?.entries.filter((e) => e[".tag"] === "file")
-  );
+  let downloadImage: DownloadImage;
 
-  $: hasMore = listFolderResult?.has_more;
-  $: cursor = listFolderResult?.cursor;
+  let historyStack: string[] = [];
 
-  const loadItems = async (path: string = ""): Promise<void> => {
+  $: isOnRootLevel = historyStack.length === 1;
+
+  onMount(() => loadItems());
+
+  //#region Load Items
+  const loadItemsHandler = (event: CustomEvent<OpenFileFolderEvent>) =>
+    loadItems(event.detail.path);
+
+  const loadItems = async (
+    path: string = "",
+    isNavBack = false
+  ): Promise<void> => {
     isLoading = true;
-
-    // @ts-ignore
-    const dbx = new Dropbox.Dropbox({ accessToken });
 
     await (<Dropbox>dbx)
       .filesListFolder({ path, include_media_info: true })
       .then((response) => (listFolderResult = response.result))
+      .then(() =>
+        !isNavBack ? (historyStack = [...historyStack, path]) : void 0
+      )
+      .then(() => {
+        if (isOnRootLevel) {
+          softkeysStore.setLeft(void 0);
+          return;
+        }
+
+        softkeysStore.setLeft({
+          label: "Back",
+          callback: () => {
+            const prevPath = historyStack.slice(-2, -1)[0];
+            historyStack = historyStack.slice(0, -2);
+
+            return loadItems(prevPath);
+          },
+        });
+      })
       .then(() => (isLoading = false))
       .catch(
         (
@@ -47,7 +78,7 @@
           isLoading = false;
 
           if (!errorResponse.error?.error) {
-            dispatch("error", <ListWrapperError>{
+            dispatch("error", <ListWrapperToast>{
               message: <string>(<unknown>errorResponse.error),
             });
             return;
@@ -56,18 +87,12 @@
           const tag = errorResponse.error?.error[".tag"];
 
           if (errorResponse.status === 409 && tag === "path") {
-            dispatch("error", <ListWrapperError>{ message: "Path not found" });
+            dispatch("error", <ListWrapperToast>{ message: "Path not found" });
             loadItems("");
             return;
           }
 
-          if (
-            [
-              "invalid_access_token",
-              "expired_access_token",
-              "user_suspended",
-            ].includes(tag)
-          ) {
+          if (checkIsAuthError(errorResponse)) {
             dispatch("autherror");
             return;
           }
@@ -76,34 +101,99 @@
         }
       );
   };
+  //#endregion
+
+  //#region Load Item
+  const loadItemHandler = (event: CustomEvent<OpenFileFolderEvent>) =>
+    downloadItem(event.detail.path);
+
+  const downloadItem = async (path: string): Promise<void> => {
+    isLoading = true;
+
+    const downloadArgs = <files.DownloadArg>{ path };
+
+    await (<Dropbox>dbx)
+      .filesDownload(downloadArgs)
+      .then((item) => {
+        console.log("downloaded", item, item.result.is_downloadable);
+        isLoading = false;
+
+        if (item.result.is_downloadable) {
+          downloadImage = <DownloadImage>{
+            // @ts-ignore
+            src: getUrlFromBlob(item.result.fileBlob),
+            alt: item.result.name,
+          };
+        } else {
+          throw new Error("Unsupported file type");
+        }
+      })
+      .then(() => {
+        prepareSoftkeysForSubpage();
+      })
+      .catch((errorResponse) => {
+        if (checkIsAuthError(errorResponse)) {
+          dispatch("autherror");
+          return;
+        }
+
+        throw errorResponse;
+      })
+      .catch((err: Error<string> | unknown) => {
+        if (err instanceof Error) {
+          dispatch("warn", <ListWrapperToast>{ message: err.message });
+          return;
+        }
+
+        throw err;
+      })
+      .then(() => (isLoading = false));
+  };
+  //#endregion
+
+  const prepareSoftkeysForSubpage = (): void => {
+    softkeysStore.stack();
+
+    softkeysStore.setRight({
+      label: "Zoom",
+      callback: () => {
+        return new Promise((resolve) => {
+          imageZoomStore.update((isZoomed) => !isZoomed);
+          resolve();
+        });
+      },
+    });
+
+    softkeysStore.setCenter();
+    softkeysStore.setLeft({
+      label: "Back",
+      callback: () => {
+        downloadImage = void 0;
+        softkeysStore.pop();
+      },
+    } as Softkey);
+  };
 </script>
 
-<h2 data-l10n-id="list-wrapper-header">List Wrapper Header</h2>
-<button
-  on:click="{loadItems.bind(this, '')}"
-  disabled="{isLoading}"
-  data-l10n-id="list-wrapper-refresh-cta">Refresh</button>
+{#if isLoading}
+  <div class="status-message">Loading...</div>
+{:else if downloadImage}
+  <Image image="{downloadImage}" />
+{:else if listFolderResult && listFolderResult.entries.length}
+  <ListView
+    items="{listFolderResult}"
+    on:openfolder="{loadItemsHandler}"
+    on:openfile="{loadItemHandler}" />
+{:else}
+  <div class="status-message">
+    <div>This folder is empty</div>
+  </div>
+{/if}
 
-<div>
-  {#if hasFolders}
-    <h2>Folders</h2>
-    {#each remoteFolders as folder, i (folder.id)}
-      <button on:click="{loadItems.bind(this, folder.path_lower)}"
-        >{i + 1}
-        -
-        {folder.name}</button>
-    {/each}
-  {/if}
-
-  {#if hasFiles}
-    <h2>Files</h2>
-    {#each remoteFiles as file, i (file.id)}{i + 1} - {file.name}{/each}
-  {/if}
-
-  <!-- TODO: load more items -->
-  {#if hasMore}
-    There are more entries available, load them with cursor
-    {cursor}
-    [not implemented yet]
-  {/if}
-</div>
+<style lang="scss">
+  .status-message {
+    height: 100%;
+    text-align: center;
+    margin-top: 1rem;
+  }
+</style>

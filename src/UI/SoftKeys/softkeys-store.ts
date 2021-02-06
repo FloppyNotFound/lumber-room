@@ -5,6 +5,8 @@ import type { Softkey } from "./models/softkey.model";
 const createSoftkeysStore = () => {
   const { subscribe, set, update } = writable<Softkeys>({});
 
+  const stack = <Softkeys[]>[];
+
   return {
     subscribe,
     clear: (): void => set({}),
@@ -33,6 +35,11 @@ const createSoftkeysStore = () => {
             right: softkey,
           }
       ),
+    stack: (): void => {
+      const unsubscribe = subscribe((items) => stack.push(items));
+      unsubscribe();
+    },
+    pop: (): void => (stack.length ? set(stack.pop()) : void 0),
   };
 };
 

@@ -7,10 +7,11 @@
   import ListWrapper from "./UI/ListWrapper/ListWrapper.svelte";
   import Header from "./UI/Header/Header.svelte";
   import SoftKeys from "./UI/SoftKeys/SoftKeys.svelte";
+  import DPad from "./UI/DPad/DPad.svelte";
   import Toast from "./UI/Toast/Toast.svelte";
   import { softkeysStore } from "./UI/SoftKeys/softkeys-store";
   import { toastStore } from "./UI/Toast/toast-store";
-  import type { ListWrapperError } from "./UI/ListWrapper/models/list-wrapper-error.model";
+  import type { ListWrapperToast } from "./UI/ListWrapper/models/list-wrapper-toast.model";
 
   const clientId = "oejf5drg46j71z6";
 
@@ -32,10 +33,19 @@
     authStore.set(accessToken);
 
     initSoftkeys();
+
+    // Cursor is needed for Dropbox login
+    if (!accessToken) {
+      // @ts-ignore
+      navigator.spatialNavigationEnabled = true;
+    } else {
+      // @ts-ignore
+      navigator.spatialNavigationEnabled = false;
+    }
   });
 
   const initSoftkeys = (): void => {
-    softkeysStore.setLeft({
+    /* softkeysStore.setLeft({
       label: "Back",
       callback: () => {
         return new Promise((resolve) => {
@@ -43,7 +53,7 @@
           resolve();
         });
       },
-    });
+    }); */
 
     softkeysStore.setCenter({
       label: "SELECT",
@@ -72,7 +82,10 @@
     authStore.set(void 0);
   };
 
-  const showListWrapperError = (msg: CustomEvent<ListWrapperError>): void =>
+  const showListWrapperWarning = (msg: CustomEvent<ListWrapperToast>): void =>
+    toastStore.warn(msg.detail.message);
+
+  const showListWrapperError = (msg: CustomEvent<ListWrapperToast>): void =>
     toastStore.alert(msg.detail.message);
 </script>
 
@@ -89,24 +102,27 @@
         <ListWrapper
           accessToken="{$authStore}"
           on:autherror="{logout}"
+          on:warn="{showListWrapperWarning}"
           on:error="{showListWrapperError}" />
       {/if}
     </section>
   </main>
 
-  <button on:click="{() => toastStore.alert('Ping')}">Show alert toast</button>
-
   <SoftKeys />
+  <DPad className="{'list-view-item'}" correction="{-46}" />
 </div>
 
 <style lang="scss">
   .app-wrapper {
     display: flex;
     flex-direction: column;
+    margin-top: -0.5rem;
 
     main {
-      text-align: center;
-      padding: 1rem 0 2rem 0;
+      margin-top: 1.25rem;
+      section {
+        margin-bottom: 1.5rem;
+      }
     }
   }
 </style>

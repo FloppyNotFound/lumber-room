@@ -76,6 +76,8 @@
 </footer>
 
 <style lang="scss">
+  @import "../../styles/colors.scss";
+
   .footer {
     width: 100%;
     position: fixed;
@@ -86,8 +88,8 @@
     &__softkeys {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      background-color: #cccccc;
-      color: #323232;
+      background-color: $app-softkeys-background;
+      color: $app-softkeys-foreground;
       padding: 0 0.25rem;
       align-items: center;
 
