@@ -67,6 +67,15 @@
 
     authStore.set(accessToken);
     initSoftkeys();
+
+    // Cursor is needed for Dropbox login
+    if (!accessToken) {
+      // @ts-ignore
+      navigator.spatialNavigationEnabled = true;
+    } else {
+      // @ts-ignore
+      navigator.spatialNavigationEnabled = false;
+    }
   });
 
   const initSoftkeys = (): void => {
