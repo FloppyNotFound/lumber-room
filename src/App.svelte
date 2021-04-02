@@ -22,60 +22,42 @@
 
   onMount(async () => {
     const accessToken = await authDbService.getAccessToken();
-
-    // Check if access token is cached and still valid, if not, refresh access token
     if (accessToken) {
       authStore.set(accessToken);
       initSoftkeys();
       return;
     }
 
-    const codeVerifier = await authDbService.getCodeVerifier();
-    console.log("cached code verifier", codeVerifier);
-
-    // Cursor is needed for Dropbox login
-    if (!codeVerifier) {
-      // @ts-ignore
-      navigator.spatialNavigationEnabled = true;
-      isLoginRequired = true;
+    const pkceCodeVerifier = await authDbService.getCodeVerifier();
+    if (!pkceCodeVerifier) {
+      setLoginActive();
       return;
     }
 
-    let code = getQueryVariable(window.location.search.substring(1), "code");
-    if (!code) {
-      // Request new code
-      throw Error("Auth error");
+    const pkceCode = getQueryVariable(
+      window.location.search.substring(1),
+      "code"
+    );
+    if (!pkceCode) {
+      resetLogin();
+      return;
     }
 
-    // @ts-ignore
-    navigator.spatialNavigationEnabled = false;
-    const authService = new AuthService(clientId, codeVerifier);
-    console.log(authService);
+    const newAccessToken = await getNewAccessToken(pkceCodeVerifier, pkceCode);
+    if (!newAccessToken) {
+      resetLogin();
+      return;
+    }
 
-    await authService.getAuthenticationUrl();
-    authService.setCodeVerifier(codeVerifier);
-    const newAccessToken = await authService.requestAccessToken(code);
+    authDbService.setAccessToken(
+      newAccessToken.accessToken,
+      newAccessToken.accessTokenExpiresIn
+    );
+    authStore.set(newAccessToken.accessToken);
 
-    console.log("new access token", newAccessToken);
-
-    // todo
-    authDbService.setAccessToken(<string>newAccessToken, 0);
-    /* authService.setAccessToken(
-          newAccessToken,
-          newAccessTokenExpiresInXSeconds
-        ) */
-
-    authStore.set(accessToken);
     initSoftkeys();
 
-    // Cursor is needed for Dropbox login
-    if (!accessToken) {
-      // @ts-ignore
-      navigator.spatialNavigationEnabled = true;
-    } else {
-      // @ts-ignore
-      navigator.spatialNavigationEnabled = false;
-    }
+    setCursorActive(false);
   });
 
   const initSoftkeys = (): void => {
@@ -110,20 +92,26 @@
     });
   };
 
+  const setLoginActive = () => {
+    setCursorActive(true);
+    isLoginRequired = true;
+  };
+
   const login = async (
     codeVerifierEvent: CustomEvent<{ codeVerifier: string; authLink: string }>
   ): Promise<void> => {
-    console.log("save code verifier to db");
-
     await authDbService.setCodeVerifier(codeVerifierEvent.detail.codeVerifier);
 
     document.location.href = codeVerifierEvent.detail.authLink;
   };
 
-  const logout = async (): Promise<void> => {
+  const resetLogin = async (): Promise<void> => {
     toastStore.warn("Your session timed out, please re-login");
+
     await authDbService.logout();
     authStore.set(void 0);
+
+    setLoginActive();
   };
 
   const showListWrapperWarning = (msg: CustomEvent<ListWrapperToast>): void =>
@@ -131,6 +119,16 @@
 
   const showListWrapperError = (msg: CustomEvent<ListWrapperToast>): void =>
     toastStore.alert(msg.detail.message);
+
+  const setCursorActive = (isActive: boolean) =>
+    // @ts-ignore
+    (navigator.spatialNavigationEnabled = isActive);
+
+  const getNewAccessToken = async (codeVerifier: string, code: string) => {
+    const authService = new AuthService(clientId, codeVerifier);
+    const newAccessToken = await authService.requestAccessToken(code);
+    return newAccessToken;
+  };
 </script>
 
 <div class="app-wrapper">
@@ -147,7 +145,7 @@
       {:else}
         <ListWrapper
           accessToken="{$authStore}"
-          on:autherror="{logout}"
+          on:autherror="{resetLogin}"
           on:warn="{showListWrapperWarning}"
           on:error="{showListWrapperError}" />
       {/if}

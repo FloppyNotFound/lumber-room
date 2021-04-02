@@ -20,8 +20,7 @@ export class AuthService {
     if (!AuthService._dbx) {
       // @ts-ignore
       AuthService._dbx = new Dropbox.DropboxAuth(this.dropboxOptions);
-      // @ts-ignore
-      AuthService._dbx.codeVerifier = codeVerifier;
+      AuthService._dbx.setCodeVerifier(codeVerifier);
     }
   }
 
@@ -35,7 +34,7 @@ export class AuthService {
         this._redirectUrl,
         void 0,
         "code",
-        void 0,
+        "offline",
         void 0,
         void 0,
         true
@@ -53,24 +52,20 @@ export class AuthService {
     AuthService._dbx.codeVerifier = verifier;
   }
 
-  requestAccessToken(accessCode: string): Promise<unknown> {
-    console.log(
-      "requestAccessToken with access code",
-      accessCode,
-      AuthService._dbx
-    );
-
+  requestAccessToken(
+    accessCode: string
+  ): Promise<void | { accessToken: string; accessTokenExpiresIn: number }> {
     return AuthService._dbx
       .getAccessTokenFromCode(this._redirectUrl, accessCode)
       .then((token) => {
-        console.log("token", token);
+        // @ts-ignore
+        const accessToken = token.result.access_token;
+        AuthService._dbx.setAccessToken(accessToken);
 
         // @ts-ignore
-        const refreshToken = token.result.refresh_token;
-        AuthService._dbx.setRefreshToken(refreshToken);
+        const expiresIn = token.result.expires_in;
+        return { accessToken, accessTokenExpiresIn: expiresIn };
       })
       .catch((error) => console.error(error));
   }
 }
-// https://www.dropbox.com/oauth2/authorize?client_id=<APP_KEY>&response_type=code&code_challenge=<CHALLENGE>&code_challenge_method=<METHOD>
-// https://www.dropbox.com/oauth2/authorize?response_type=code&client_id=oejf5drg46j71z6&redirect_uri=http://localhost:5000&token_access_type=offline&code_challenge_method=S256&code_challenge=NTQsMTQxLDE3MywzLDIxMywxMDUsNzIsMTE3LDc0LDE3MSwyMjgsMTkyLDExNCwyMzcsNDQsMTg4LDI4LDIyMyw1OSw0Niw3OCwzNSw5NCwxMzYsODYsMTA5LDE5NCwx
