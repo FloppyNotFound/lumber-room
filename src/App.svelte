@@ -13,6 +13,8 @@
   import type { ListWrapperToast } from "./UI/ListWrapper/models/list-wrapper-toast.model";
   import getQueryVariable from "./UI/Auth/helpers/get-query-variable";
   import { AuthService } from "./UI/Auth/services/auth.service";
+  import type { PkceDropboxAuthTokenData } from "./UI/Auth/models/pkce-dropbox-auth-token-data.interface";
+  import type { PkceDropboxAuthAccessTokenData } from "./UI/Auth/models/pkce-dropbox-auth-access-token-data.interface";
 
   const clientId = "oejf5drg46j71z6";
 
@@ -28,6 +30,21 @@
       return;
     }
 
+    const refreshToken = await authDbService.getRefreshToken();
+    if (refreshToken) {
+      const newAccessToken = await new AuthService(clientId).refreshAccessToken(
+        refreshToken
+      );
+
+      if (!newAccessToken) {
+        await resetLogin();
+        return;
+      }
+
+      await onLoginSuccess(newAccessToken);
+      return;
+    }
+
     const pkceCodeVerifier = await authDbService.getCodeVerifier();
     if (!pkceCodeVerifier) {
       setLoginActive();
@@ -39,25 +56,19 @@
       "code"
     );
     if (!pkceCode) {
-      resetLogin();
+      await resetLogin();
       return;
     }
 
     const newAccessToken = await getNewAccessToken(pkceCodeVerifier, pkceCode);
     if (!newAccessToken) {
-      resetLogin();
+      await resetLogin();
       return;
     }
 
-    authDbService.setAccessToken(
-      newAccessToken.accessToken,
-      newAccessToken.accessTokenExpiresIn
-    );
-    authStore.set(newAccessToken.accessToken);
+    await authDbService.setRefreshToken(newAccessToken.refreshToken);
 
-    initSoftkeys();
-
-    setCursorActive(false);
+    await onLoginSuccess(newAccessToken);
   });
 
   const initSoftkeys = (): void => {
@@ -124,10 +135,25 @@
     // @ts-ignore
     (navigator.spatialNavigationEnabled = isActive);
 
-  const getNewAccessToken = async (codeVerifier: string, code: string) => {
+  const getNewAccessToken = async (
+    codeVerifier: string,
+    code: string
+  ): Promise<PkceDropboxAuthTokenData | undefined> => {
     const authService = new AuthService(clientId, codeVerifier);
     const newAccessToken = await authService.requestAccessToken(code);
     return newAccessToken;
+  };
+
+  const onLoginSuccess = async (
+    newAccessToken: PkceDropboxAuthAccessTokenData
+  ): Promise<void> => {
+    await authDbService.setAccessToken(
+      newAccessToken.accessToken,
+      newAccessToken.accessTokenExpiresInSeconds
+    );
+    authStore.set(newAccessToken.accessToken);
+    initSoftkeys();
+    setCursorActive(false);
   };
 </script>
 

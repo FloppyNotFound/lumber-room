@@ -3,4 +3,5 @@ export interface AuthTable {
   codeVerifier?: string;
   accessToken?: string;
   accessTokenValidUntil?: Date;
+  refreshToken?: string;
 }

@@ -18,7 +18,7 @@ export class AuthDbService implements AuthServiceContract {
 
   setAccessToken(
     newAccessToken: string,
-    newAccessTokenExpiresInXSeconds: number
+    newAccessTokenExpiresInSeconds: number
   ): PromiseLike<string> {
     return this._db.transaction("rw", this._db.authTable, async () => {
       const authInfo = (await this._db.authTable.toArray())[0];
@@ -26,11 +26,32 @@ export class AuthDbService implements AuthServiceContract {
       await this._db.authTable.update(authInfo.id, {
         accessToken: newAccessToken,
         accessTokenValidUntil: new Date(
-          new Date().getTime() + Number(newAccessTokenExpiresInXSeconds) * 1000
+          new Date().getTime() + Number(newAccessTokenExpiresInSeconds) * 1000
         ),
       });
 
       return newAccessToken;
+    });
+  }
+
+  getRefreshToken(): PromiseLike<string> {
+    return this._db.transaction("r", this._db.authTable, async () => {
+      const authTable = await this._db.authTable.toArray();
+      return this.getCachedRefreshToken(authTable);
+    });
+  }
+
+  setRefreshToken(refreshToken: string): PromiseLike<string> {
+    return this._db.transaction("rw", this._db.authTable, async () => {
+      const authInfo = (await this._db.authTable.toArray())[0];
+
+      await this._db.authTable.update(authInfo.id, {
+        refreshToken,
+        accessToken: void 0,
+        accessTokenValidUntil: void 0,
+      });
+
+      return refreshToken;
     });
   }
 
@@ -49,6 +70,7 @@ export class AuthDbService implements AuthServiceContract {
         codeVerifier: newCodeVerifier,
         accessToken: void 0,
         accessTokenValidUntil: void 0,
+        refreshToken: void 0,
       });
 
       return newCodeVerifier;
@@ -64,7 +86,7 @@ export class AuthDbService implements AuthServiceContract {
   }
 
   private getCachedCodeVerifier(authTable: AuthTable[]): string | undefined {
-    const authData = authTable.length ? authTable[0] : void 0;
+    const authData = this.getAuthData(authTable);
     if (!authData) {
       return void 0;
     }
@@ -75,7 +97,7 @@ export class AuthDbService implements AuthServiceContract {
   }
 
   private getCachedAccessToken(authTable: AuthTable[]): string | undefined {
-    const authData = authTable.length ? authTable[0] : void 0;
+    const authData = this.getAuthData(authTable);
     if (!authData) {
       return void 0;
     }
@@ -87,5 +109,18 @@ export class AuthDbService implements AuthServiceContract {
     }
 
     return accessToken;
+  }
+
+  private getCachedRefreshToken(authTable: AuthTable[]): string | undefined {
+    const authData = this.getAuthData(authTable);
+    if (!authData) {
+      return void 0;
+    }
+
+    return authData.refreshToken;
+  }
+
+  private getAuthData(authTable: AuthTable[]): AuthTable | undefined {
+    return authTable.length ? authTable[0] : void 0;
   }
 }

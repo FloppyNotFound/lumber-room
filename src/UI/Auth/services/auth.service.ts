@@ -1,9 +1,8 @@
-import type { DropboxAuth, DropboxAuthOptions } from "dropbox";
-import type { DropboxPkceAuthOptions } from "../models/pkce-dropbox-auth-options.interface";
+import type { DropboxAuth, DropboxAuthOptions, DropboxResponse } from "dropbox";
+import type { PkceDropboxAuthAccessTokenData } from "../models/pkce-dropbox-auth-access-token-data.interface";
+import type { PkceDropboxAuthTokenData } from "../models/pkce-dropbox-auth-token-data.interface";
 
 export class AuthService {
-  dropboxOptions: DropboxPkceAuthOptions;
-
   private static _dbx: DropboxAuth;
   private readonly _redirectUrl = "http://localhost:5000";
 
@@ -11,16 +10,16 @@ export class AuthService {
    * @param clientId: Dropbox Client Id
    * @param codeVerifier: A previously cached PKCE code verifier, if available
    */
-  constructor(clientId: string, codeVerifier?: string) {
-    this.dropboxOptions = <DropboxAuthOptions>{
+  constructor(clientId: string, codeVerifier?: string, refreshToken?: string) {
+    const dropboxOptions = <DropboxAuthOptions>{
       clientId,
-      codeVerifier,
     };
 
     if (!AuthService._dbx) {
       // @ts-ignore
-      AuthService._dbx = new Dropbox.DropboxAuth(this.dropboxOptions);
+      AuthService._dbx = new Dropbox.DropboxAuth(dropboxOptions);
       AuthService._dbx.setCodeVerifier(codeVerifier);
+      AuthService._dbx.setRefreshToken(refreshToken);
     }
   }
 
@@ -52,20 +51,69 @@ export class AuthService {
     AuthService._dbx.codeVerifier = verifier;
   }
 
-  requestAccessToken(
+  async requestAccessToken(
     accessCode: string
-  ): Promise<void | { accessToken: string; accessTokenExpiresIn: number }> {
-    return AuthService._dbx
-      .getAccessTokenFromCode(this._redirectUrl, accessCode)
-      .then((token) => {
-        // @ts-ignore
-        const accessToken = token.result.access_token;
-        AuthService._dbx.setAccessToken(accessToken);
+  ): Promise<PkceDropboxAuthTokenData | undefined> {
+    let token: DropboxResponse<object>;
 
-        // @ts-ignore
-        const expiresIn = token.result.expires_in;
-        return { accessToken, accessTokenExpiresIn: expiresIn };
-      })
-      .catch((error) => console.error(error));
+    try {
+      token = await AuthService._dbx.getAccessTokenFromCode(
+        this._redirectUrl,
+        accessCode
+      );
+    } catch (error) {
+      console.error(error);
+
+      return void 0;
+    }
+
+    // @ts-ignore
+    const accessToken = token.result.access_token;
+    AuthService._dbx.setAccessToken(accessToken);
+
+    // @ts-ignore
+    const expiresInSeconds = token.result.expires_in;
+    const expiresAt = new Date();
+    expiresAt.setSeconds(expiresAt.getSeconds() + expiresInSeconds);
+    AuthService._dbx.setAccessTokenExpiresAt(expiresAt);
+
+    // @ts-ignore
+    const refreshToken = token.result.refresh_token;
+    AuthService._dbx.setRefreshToken(refreshToken);
+    // TODO: check scopes (will look like this: account_info.read files.content.read files.content.write files.metadata.read files.metadata.writes)
+
+    return {
+      accessToken,
+      accessTokenExpiresInSeconds: expiresInSeconds,
+      refreshToken,
+    };
+  }
+
+  async refreshAccessToken(
+    refreshToken: string
+  ): Promise<PkceDropboxAuthAccessTokenData | undefined> {
+    AuthService._dbx.setRefreshToken(refreshToken);
+
+    try {
+      // Method actually returns a Promise, not void
+      // see https://github.com/dropbox/dropbox-sdk-js/issues/606
+      // @ts-ignore
+      await AuthService._dbx.refreshAccessToken();
+    } catch (error) {
+      console.error(error);
+      return void 0;
+    }
+
+    const accessToken = AuthService._dbx.getAccessToken();
+
+    let expiresInSeconds = Math.round(
+      (AuthService._dbx.getAccessTokenExpiresAt().getTime() -
+        new Date().getTime()) /
+        1000
+    );
+
+    if (expiresInSeconds < 0) expiresInSeconds = 0;
+
+    return { accessToken, accessTokenExpiresInSeconds: expiresInSeconds };
   }
 }
