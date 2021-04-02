@@ -1,5 +1,6 @@
-import type { DropboxAuth, DropboxAuthOptions, DropboxResponse } from "dropbox";
+import type { DropboxAuth, DropboxAuthOptions } from "dropbox";
 import type { PkceDropboxAuthAccessTokenData } from "../models/pkce-dropbox-auth-access-token-data.interface";
+import type { PkceDropboxAuthAccessTokenResponse } from "../models/pkce-dropbox-auth-access-token-response.interface";
 import type { PkceDropboxAuthTokenData } from "../models/pkce-dropbox-auth-token-data.interface";
 
 export class AuthService {
@@ -54,33 +55,31 @@ export class AuthService {
   async requestAccessToken(
     accessCode: string
   ): Promise<PkceDropboxAuthTokenData | undefined> {
-    let token: DropboxResponse<object>;
+    let token: PkceDropboxAuthAccessTokenResponse;
 
     try {
-      token = await AuthService._dbx.getAccessTokenFromCode(
+      const response = await AuthService._dbx.getAccessTokenFromCode(
         this._redirectUrl,
         accessCode
       );
+      token = <PkceDropboxAuthAccessTokenResponse>response.result;
     } catch (error) {
       console.error(error);
 
       return void 0;
     }
 
-    // @ts-ignore
-    const accessToken = token.result.access_token;
+    const accessToken = token.access_token;
     AuthService._dbx.setAccessToken(accessToken);
 
-    // @ts-ignore
-    const expiresInSeconds = token.result.expires_in;
-    const expiresAt = new Date();
-    expiresAt.setSeconds(expiresAt.getSeconds() + expiresInSeconds);
+    const expiresInSeconds = token.expires_in;
+    const expiresAt = this.getExpiresAt(expiresInSeconds, new Date());
     AuthService._dbx.setAccessTokenExpiresAt(expiresAt);
 
     // @ts-ignore
-    const refreshToken = token.result.refresh_token;
+    const refreshToken = token.refresh_token;
     AuthService._dbx.setRefreshToken(refreshToken);
-    // TODO: check scopes (will look like this: account_info.read files.content.read files.content.write files.metadata.read files.metadata.writes)
+    // TODO: check token.scope (will look like this: account_info.read files.content.read files.content.write files.metadata.read files.metadata.writes)
 
     return {
       accessToken,
@@ -101,19 +100,35 @@ export class AuthService {
       await AuthService._dbx.refreshAccessToken();
     } catch (error) {
       console.error(error);
+
       return void 0;
     }
 
-    const accessToken = AuthService._dbx.getAccessToken();
+    const newAccessToken = AuthService._dbx.getAccessToken();
+    const expiresInSeconds = this.getExpiresInSeconds(
+      AuthService._dbx.getAccessTokenExpiresAt(),
+      new Date()
+    );
 
+    return {
+      accessToken: newAccessToken,
+      accessTokenExpiresInSeconds: expiresInSeconds,
+    };
+  }
+
+  private getExpiresAt(expiresInSeconds: number, now: Date) {
+    const expiresAt = now;
+    expiresAt.setSeconds(expiresAt.getSeconds() + expiresInSeconds);
+    return expiresAt;
+  }
+
+  private getExpiresInSeconds(expiresAt: Date, now: Date): number {
     let expiresInSeconds = Math.round(
-      (AuthService._dbx.getAccessTokenExpiresAt().getTime() -
-        new Date().getTime()) /
-        1000
+      (expiresAt.getTime() - now.getTime()) / 1000
     );
 
     if (expiresInSeconds < 0) expiresInSeconds = 0;
 
-    return { accessToken, accessTokenExpiresInSeconds: expiresInSeconds };
+    return expiresInSeconds;
   }
 }
