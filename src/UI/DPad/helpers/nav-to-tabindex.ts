@@ -1,3 +1,28 @@
+interface OffsetItem {
+  offsetParent: OffsetItem;
+  offsetTop: number | undefined;
+}
+
+/**
+ * @see https://stackoverflow.com/a/11986374
+ * @param obj The currently focused HTML element
+ */
+const findScrollPosition = (obj: OffsetItem, correction: number): number => {
+  if (!obj.offsetParent) {
+    return 0;
+  }
+
+  let offsetItem = obj;
+
+  let curtop = 0;
+  do {
+    curtop += obj.offsetTop ?? 0;
+    offsetItem = offsetItem.offsetParent;
+  } while (offsetItem);
+
+  return curtop + correction;
+};
+
 const navToTabindex = (
   difference: number,
   className: string,
@@ -13,24 +38,10 @@ const navToTabindex = (
   }
 
   targetElement.focus({ preventScroll: true });
-  window.scrollTo(0, findScrollPosition(targetElement, correction));
-};
-
-/**
- * @see https://stackoverflow.com/a/11986374
- * @param obj The currently focused HTML element
- */
-const findScrollPosition = (obj: any, correction: number): number => {
-  if (!obj.offsetParent) {
-    return 0;
-  }
-
-  let curtop = 0;
-  do {
-    curtop += obj.offsetTop;
-  } while ((obj = obj.offsetParent));
-
-  return curtop + correction;
+  window.scrollTo(
+    0,
+    findScrollPosition(<OffsetItem>(<unknown>targetElement), correction)
+  );
 };
 
 export default navToTabindex;

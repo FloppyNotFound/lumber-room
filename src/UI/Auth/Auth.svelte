@@ -1,9 +1,8 @@
 <script lang="ts">
-  import { AuthService } from "./services/auth.service";
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher } from 'svelte';
+  import AuthService from './services/auth.service';
 
   export let clientId: string;
-  export let codeVerifier: string;
 
   let authLink: string;
   let authService: AuthService;
@@ -15,9 +14,9 @@
 
     authLink = await authService.getAuthenticationUrl();
 
-    codeVerifier = authService.getCodeVerifier();
+    const verifier = authService.getCodeVerifier();
 
-    dispatch("login", { codeVerifier, authLink });
+    dispatch('login', { codeVerifier: verifier, authLink });
   };
 </script>
 

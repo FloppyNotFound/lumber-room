@@ -1,44 +1,53 @@
 <script lang="ts">
-  import type { OpenFileFolderEvent } from "../../models/open-file-folder-event.model";
-  import { createEventDispatcher } from "svelte";
-  import getFileSize from "./helpers/get-file-size";
-  import type { FileFolder } from "./models/file-folder.interface";
+  import { createEventDispatcher } from 'svelte';
+  import getFileSize from './helpers/get-file-size';
+  import type { OpenFileFolderEvent } from '../../models/open-file-folder-event.model';
+  import type { FileFolder } from './models/file-folder.interface';
 
   export let item: FileFolder;
   export let tabIndex: number;
 
   $: isFolder = item.isFolder;
 
-  $: clickButtonHandler = (path: string): void =>
-    isFolder ? openFolderHandler(path) : openFileHandler(path);
+  $: isImage = checkIsImage(item);
+
+  $: isPdf = getFileEnding(item).endsWith('.pdf');
+
+  $: fileSize = getFileSize(item.sizeBytes);
+
+  $: lastModified = getModifiedDate(item.lastModified);
 
   const dispach = createEventDispatcher();
 
-  const openFileHandler = (path: string): void =>
-    dispach("openfile", <OpenFileFolderEvent>{ path });
+  const onOpenFile = (path: string): void =>
+    dispach('openfile', <OpenFileFolderEvent>{ path });
 
-  const openFolderHandler = (path: string): void =>
-    dispach("openfolder", <OpenFileFolderEvent>{ path });
+  const onOpenFolder = (path: string): void =>
+    dispach('openfolder', <OpenFileFolderEvent>{ path });
 
-  const getModifiedDate = (date: string): string =>
-    new Date(date).toDateString();
+  const getModifiedDate = (date: string | undefined): string =>
+    date ? new Date(date).toDateString() : '';
 
-  const getFileEnding = (file: FileFolder) => file.name.toLowerCase();
+  const getFileEnding = (file: FileFolder): string => file.name.toLowerCase();
 
   /**
    * @see https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types
    * @param file
    */
-  const checkIsImage = (file: FileFolder) =>
-    ["jpg", "jpeg", "jfif", "pjpeg", "pjp", "png"].includes(
-      getFileEnding(file).split(".").pop().toLowerCase()
-    );
+  const checkIsImage = (file: FileFolder): boolean => {
+    const imageFileEndings = ['jpg', 'jpeg', 'jfif', 'pjpeg', 'pjp', 'png'];
+    const fileEnding = getFileEnding(file).split('.').pop()?.toLowerCase();
+    return !!fileEnding && imageFileEndings.includes(fileEnding);
+  };
+
+  const onButtonClicked = (): void =>
+    isFolder ? onOpenFolder(item.path) : onOpenFile(item.path);
 </script>
 
 <button
   tabindex="{tabIndex}"
   class="list-view-item"
-  on:click="{clickButtonHandler.bind(this, item.path)}">
+  on:click="{onButtonClicked}">
   <div class="list-view-item-content">
     {#if isFolder}
       <div class="col-1">
@@ -49,9 +58,9 @@
       </div>
     {:else}
       <div class="col-1">
-        {#if getFileEnding(item).endsWith(".pdf")}
+        {#if isPdf}
           <span class="icon-file-pdf"></span>
-        {:else if checkIsImage(item)}
+        {:else if isImage}
           <span class="icon-file-picture"></span>
         {:else}
           <!-- TODO: Support more file types -->
@@ -61,7 +70,7 @@
       <div class="col-2">
         <div class="row-1">{item.name}</div>
         <div class="row-2">
-          {getFileSize(item.sizeBytes)} - {getModifiedDate(item.lastModified)}
+          {fileSize} - {lastModified}
         </div>
       </div>
     {/if}
@@ -69,7 +78,7 @@
 </button>
 
 <style lang="scss">
-  @import "../../../../styles/colors.scss";
+  @import '../../../../styles/colors.scss';
 
   .list-view-item {
     width: 100%;

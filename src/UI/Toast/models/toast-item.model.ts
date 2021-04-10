@@ -1,4 +1,4 @@
-import type { ToastType } from "../enums/toast-type.enum";
+import type ToastType from '../enums/toast-type.enum';
 
 export interface ToastItem {
   message: string;

@@ -3,9 +3,10 @@
   "include": ["src/**/*"],
   "exclude": ["node_modules/*", "__sapper__/*", "public/*"],
   "compilerOptions": {
-    "alwaysStrict": true,
+    "strict": true,
     "allowSyntheticDefaultImports": true,
     "noImplicitReturns": true,
+    "noImplicitThis": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "sourceMap": false,

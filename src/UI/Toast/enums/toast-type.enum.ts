@@ -1,5 +1,7 @@
-export enum ToastType {
-  Info = "info",
-  Warn = "warn",
-  Alert = "error",
+enum ToastType {
+  Info = 'info',
+  Warn = 'warn',
+  Alert = 'error',
 }
+
+export default ToastType;

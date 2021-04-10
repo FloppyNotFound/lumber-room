@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { onDestroy, onMount } from "svelte";
-  import { fly } from "svelte/transition";
-  import { toastStore } from "./toast-store";
+  import { onDestroy, onMount } from 'svelte';
+  import { fly } from 'svelte/transition';
+  import toastStore from './toast-store';
 
-  let toastMessage: string;
-  let toastClass: string;
+  let toastMessage: string | undefined;
+  let toastClass: string | undefined;
 
   let unsubscribe: () => void;
 
@@ -19,7 +19,10 @@
       toastMessage = toast.message;
       toastClass = toast.type;
 
-      setTimeout(() => (toastMessage = toastClass = void 0), 2000);
+      setTimeout(() => {
+        toastMessage = void 0;
+        toastClass = void 0;
+      }, 2000);
     });
   });
 

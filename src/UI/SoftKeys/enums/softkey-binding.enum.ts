@@ -1,5 +1,7 @@
-export enum SoftkeyBinding {
-  Left = "SoftLeft",
-  Center = "Enter",
-  Right = "SoftRight",
+enum SoftkeyBinding {
+  Left = 'SoftLeft',
+  Center = 'Enter',
+  Right = 'SoftRight',
 }
+
+export default SoftkeyBinding;

@@ -1,8 +1,8 @@
-import Dexie from "dexie";
-import type { AuthTable } from "./tables/auth.table";
+import Dexie from 'dexie';
+import type { AuthTable } from './tables/auth.table';
 
-export class LumberRoomDatabase extends Dexie {
-  static readonly databaseName = "LumberRoom";
+export default class LumberRoomDatabase extends Dexie {
+  static readonly databaseName = 'LumberRoom';
 
   authTable: Dexie.Table<AuthTable, number>;
 
@@ -11,9 +11,9 @@ export class LumberRoomDatabase extends Dexie {
 
     this.version(1).stores({
       authTable:
-        "++id,codeVerifier,accessToken,accessTokenValidUntil,refreshToken",
+        '++id,codeVerifier,accessToken,accessTokenValidUntil,refreshToken',
     });
 
-    this.authTable = this.table("authTable");
+    this.authTable = this.table('authTable');
   }
 }

@@ -1,3 +1,5 @@
-import { writable } from "svelte/store";
+import { writable } from 'svelte/store';
 
-export const authStore = writable<string>(null);
+const authStore = writable<string | undefined>(void 0);
+
+export default authStore;

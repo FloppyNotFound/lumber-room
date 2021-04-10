@@ -1,22 +1,22 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import { authStore } from "./UI/Auth/auth-store";
-  import { AuthDbService } from "./DAL/services/auth-db.service";
-  import Auth from "./UI/Auth/Auth.svelte";
-  import ListWrapper from "./UI/ListWrapper/ListWrapper.svelte";
-  import Header from "./UI/Header/Header.svelte";
-  import SoftKeys from "./UI/SoftKeys/SoftKeys.svelte";
-  import DPad from "./UI/DPad/DPad.svelte";
-  import Toast from "./UI/Toast/Toast.svelte";
-  import { softkeysStore } from "./UI/SoftKeys/softkeys-store";
-  import { toastStore } from "./UI/Toast/toast-store";
-  import type { ListWrapperToast } from "./UI/ListWrapper/models/list-wrapper-toast.model";
-  import getQueryVariable from "./UI/Auth/helpers/get-query-variable";
-  import { AuthService } from "./UI/Auth/services/auth.service";
-  import type { PkceDropboxAuthTokenData } from "./UI/Auth/models/pkce-dropbox-auth-token-data.interface";
-  import type { PkceDropboxAuthAccessTokenData } from "./UI/Auth/models/pkce-dropbox-auth-access-token-data.interface";
+  import { onMount } from 'svelte';
+  import authStore from './UI/Auth/auth-store';
+  import AuthDbService from './DAL/services/auth-db.service';
+  import Auth from './UI/Auth/Auth.svelte';
+  import ListWrapper from './UI/ListWrapper/ListWrapper.svelte';
+  import Header from './UI/Header/Header.svelte';
+  import SoftKeys from './UI/SoftKeys/SoftKeys.svelte';
+  import DPad from './UI/DPad/DPad.svelte';
+  import Toast from './UI/Toast/Toast.svelte';
+  import softkeysStore from './UI/SoftKeys/softkeys-store';
+  import toastStore from './UI/Toast/toast-store';
+  import type { ListWrapperToast } from './UI/ListWrapper/models/list-wrapper-toast.model';
+  import getQueryVariable from './UI/Auth/helpers/get-query-variable';
+  import AuthService from './UI/Auth/services/auth.service';
+  import type { PkceDropboxAuthTokenData } from './UI/Auth/models/pkce-dropbox-auth-token-data.interface';
+  import type { PkceDropboxAuthAccessTokenData } from './UI/Auth/models/pkce-dropbox-auth-access-token-data.interface';
 
-  const clientId = "oejf5drg46j71z6";
+  const clientId = 'oejf5drg46j71z6';
 
   const authDbService = new AuthDbService();
 
@@ -53,7 +53,7 @@
 
     const pkceCode = getQueryVariable(
       window.location.search.substring(1),
-      "code"
+      'code'
     );
     if (!pkceCode) {
       await resetLogin();
@@ -76,34 +76,32 @@
       label: "Back",
       callback: () => {
         return new Promise((resolve) => {
-          console.log("You clicked on SoftLeft");
+          console.info("You clicked on SoftLeft");
           resolve();
         });
       },
     }); */
 
     softkeysStore.setCenter({
-      label: "SELECT",
-      callback: () => {
-        return new Promise((resolve) => {
-          console.log("You clicked on SoftCenter");
+      label: 'SELECT',
+      callback: (): Promise<void> =>
+        new Promise((resolve) => {
+          console.info('You clicked on SoftCenter');
           resolve();
-        });
-      },
+        }),
     });
 
     softkeysStore.setRight({
-      label: "Options",
-      callback: () => {
-        return new Promise((resolve) => {
-          console.log("You clicked on SoftRight");
+      label: 'Options',
+      callback: (): Promise<void> =>
+        new Promise((resolve) => {
+          console.info('You clicked on SoftRight');
           resolve();
-        });
-      },
+        }),
     });
   };
 
-  const setLoginActive = () => {
+  const setLoginActive = (): void => {
     setCursorActive(true);
     isLoginRequired = true;
   };
@@ -117,7 +115,7 @@
   };
 
   const resetLogin = async (): Promise<void> => {
-    toastStore.warn("Your session timed out, please re-login");
+    toastStore.warn('Your session timed out, please re-login');
 
     await authDbService.logout();
     authStore.set(void 0);
@@ -131,9 +129,11 @@
   const showListWrapperError = (msg: CustomEvent<ListWrapperToast>): void =>
     toastStore.alert(msg.detail.message);
 
-  const setCursorActive = (isActive: boolean) =>
-    // @ts-ignore
-    (navigator.spatialNavigationEnabled = isActive);
+  const setCursorActive = (isActive: boolean): void => {
+    (<{ spatialNavigationEnabled: boolean }>(
+      (<unknown>navigator)
+    )).spatialNavigationEnabled = isActive;
+  };
 
   const getNewAccessToken = async (
     codeVerifier: string,

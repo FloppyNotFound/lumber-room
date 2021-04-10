@@ -1,9 +1,19 @@
-import { writable } from "svelte/store";
-import type { ToastItem } from "./models/toast-item.model";
-import { ToastType } from "./enums/toast-type.enum";
+import { Subscriber, Unsubscriber, writable } from 'svelte/store';
+import type { ToastItem } from './models/toast-item.model';
+import ToastType from './enums/toast-type.enum';
 
-const createToastStore = () => {
-  const { subscribe, set } = writable<ToastItem>(void 0);
+interface ToastStore {
+  subscribe: (
+    this: void,
+    run: Subscriber<ToastItem | undefined>
+  ) => Unsubscriber;
+  info: (message: string) => void;
+  warn: (message: string) => void;
+  alert: (message: string) => void;
+}
+
+const createToastStore = (): ToastStore => {
+  const { subscribe, set } = writable<ToastItem | undefined>(void 0);
 
   return {
     subscribe,
@@ -25,4 +35,6 @@ const createToastStore = () => {
   };
 };
 
-export const toastStore = createToastStore();
+const toastStore = createToastStore();
+
+export default toastStore;

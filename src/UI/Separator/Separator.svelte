@@ -7,7 +7,7 @@
 </h4>
 
 <style lang="scss">
-  @import "../../styles/colors.scss";
+  @import '../../styles/colors.scss';
 
   .separator-wrapper {
     background: $app-separator-background;

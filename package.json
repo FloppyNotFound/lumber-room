@@ -14,6 +14,7 @@
     "validate": "svelte-check",
     "pretty": "prettier --write ./src/**/*.{ts,svelte}",
     "pretty-quick": "pretty-quick --staged",
+    "lint": "eslint src --ext .svelte,.ts",
     "prepare": "husky install"
   },
   "devDependencies": {
@@ -21,7 +22,14 @@
     "@rollup/plugin-node-resolve": "^11.2.1",
     "@rollup/plugin-typescript": "^8.2.1",
     "@tsconfig/svelte": "^1.0.10",
+    "@typescript-eslint/eslint-plugin": "^4.21.0",
+    "@typescript-eslint/parser": "^4.21.0",
     "dropbox": "9.4.0",
+    "eslint": "^7.23.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-svelte3": "^3.1.2",
     "husky": "^6.0.0",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.2.1",
