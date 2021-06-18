@@ -3941,7 +3941,8 @@
         if (isBrowserEnv()) {
           var array = new Uint8Array(PKCELength);
           var randomValueArray = crypto.getRandomValues(array);
-          var base64String = btoa(randomValueArray);
+          var randomValueString = String.fromCharCode.apply(null, randomValueArray);
+          var base64String = btoa(randomValueString);
           codeVerifier = createBrowserSafeString(base64String).substr(0, 128);
         } else {
           var randomBytes = crypto.randomBytes(PKCELength);
