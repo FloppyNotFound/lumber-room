@@ -1,19 +1,23 @@
-import type { files, Error, DropboxResponseError, auth } from "dropbox";
+import type { files, Error, DropboxResponseError, auth } from 'dropbox';
 
 const checkIsAuthError = (
   errorResponse:
     | DropboxResponseError<Error<files.ListFolderError | auth.AuthError>>
-    | Error<any>
+    | Error<{ error?: { error?: { '.tag': string } } }>
 ): boolean => {
-  if (!errorResponse.error?.error) {
+  const err = errorResponse.error?.error;
+  if (!err) {
     return false;
   }
-  const tag = errorResponse.error?.error[".tag"];
+
+  // eslint-disable-next-line
+  // @ts-ignore
+  const tag = <string>err['.tag'];
 
   return [
-    "invalid_access_token",
-    "expired_access_token",
-    "user_suspended",
+    'invalid_access_token',
+    'expired_access_token',
+    'user_suspended',
   ].includes(tag);
 };
 

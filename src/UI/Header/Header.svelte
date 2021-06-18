@@ -3,7 +3,7 @@
 </header>
 
 <style lang="scss">
-  @import "../../styles/colors.scss";
+  @import '../../styles/colors.scss';
 
   .header {
     background-color: $app-background;

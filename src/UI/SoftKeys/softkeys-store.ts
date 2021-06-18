@@ -1,8 +1,19 @@
-import { writable } from "svelte/store";
-import type { Softkeys } from "./models/softkeys.model";
-import type { Softkey } from "./models/softkey.model";
+import { Subscriber, Unsubscriber, writable } from 'svelte/store';
+import type { Softkeys } from './models/softkeys.model';
+import type { Softkey } from './models/softkey.model';
 
-const createSoftkeysStore = () => {
+interface SoftkeysStore {
+  subscribe: (this: void, run: Subscriber<Softkeys>) => Unsubscriber;
+  clear: () => void;
+  set: (softkeys: Softkeys) => void;
+  setLeft: (softkey?: Softkey) => void;
+  setCenter: (softkey?: Softkey) => void;
+  setRight: (softkey?: Softkey) => void;
+  stack: () => void;
+  pop: () => void;
+}
+
+const createSoftkeysStore = (): SoftkeysStore => {
   const { subscribe, set, update } = writable<Softkeys>({});
 
   const stack = <Softkeys[]>[];
@@ -39,8 +50,15 @@ const createSoftkeysStore = () => {
       const unsubscribe = subscribe((items) => stack.push(items));
       unsubscribe();
     },
-    pop: (): void => (stack.length ? set(stack.pop()) : void 0),
+    pop: (): void => {
+      const softkeys = stack.pop();
+      if (!softkeys) throw Error('Stack is empty');
+
+      set(softkeys);
+    },
   };
 };
 
-export const softkeysStore = createSoftkeysStore();
+const softkeysStore = createSoftkeysStore();
+
+export default softkeysStore;

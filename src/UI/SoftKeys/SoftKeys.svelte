@@ -1,52 +1,48 @@
 <script lang="ts">
-  import { onDestroy, onMount } from "svelte";
-  import { SoftkeyBinding } from "./enums/softkey-binding.enum";
-  import type { Softkeys } from "./models/softkeys.model";
-  import { softkeysStore } from "./softkeys-store";
+  import { onDestroy, onMount } from 'svelte';
+  import SoftkeyBinding from './enums/softkey-binding.enum';
+  import type { Softkeys } from './models/softkeys.model';
+  import softkeysStore from './softkeys-store';
 
   let softkeys: Softkeys = {};
 
   let unsubscribe: () => void;
 
-  onMount(
-    () =>
-      (unsubscribe = softkeysStore.subscribe(
-        (keys) => (softkeys = softkeys = keys)
-      ))
-  );
+  onMount(() => {
+    unsubscribe = softkeysStore.subscribe((keys) => {
+      softkeys = keys;
+    });
+  });
 
   onDestroy(() => unsubscribe());
 
-  const keyDownHandler = (evt: KeyboardEvent): void => {
+  const onKeyDown = (evt: { key: string }): void => {
     switch (evt.key) {
       case SoftkeyBinding.Left: {
-        if (!softkeys.left?.callback) {
-          return;
+        if (softkeys.left?.callback) {
+          void softkeys.left.callback();
         }
-
-        softkeys.left.callback();
         break;
       }
       case SoftkeyBinding.Center: {
-        if (!softkeys.center?.callback) {
-          return;
+        if (softkeys.center?.callback) {
+          void softkeys.center.callback();
         }
-
-        softkeys.center.callback();
         break;
       }
       case SoftkeyBinding.Right: {
-        if (!softkeys.right?.callback) {
-          return;
+        if (softkeys.right?.callback) {
+          void softkeys.right.callback();
         }
-
-        softkeys.right.callback();
+        break;
+      }
+      default: {
         break;
       }
     }
   };
 
-  document.addEventListener("keydown", keyDownHandler);
+  document.addEventListener('keydown', onKeyDown);
 </script>
 
 <footer class="footer">
@@ -54,21 +50,21 @@
     {#if softkeys.left}
       <h5
         class="footer__softkeys-left"
-        on:click="{keyDownHandler.bind(this, { key: 'SoftLeft' })}">
+        on:click="{onKeyDown.bind(this, { key: 'SoftLeft' })}">
         {softkeys.left.label}
       </h5>
     {/if}
     {#if softkeys.center}
       <h5
         class="footer__softkeys-center"
-        on:click="{keyDownHandler.bind(this, { key: 'Enter' })}">
+        on:click="{onKeyDown.bind(this, { key: 'Enter' })}">
         {softkeys.center.label}
       </h5>
     {/if}
     {#if softkeys.right}
       <h5
         class="footer__softkeys-right"
-        on:click="{keyDownHandler.bind(this, { key: 'SoftRight' })}">
+        on:click="{onKeyDown.bind(this, { key: 'SoftRight' })}">
         {softkeys.right.label}
       </h5>
     {/if}
@@ -76,7 +72,7 @@
 </footer>
 
 <style lang="scss">
-  @import "../../styles/colors.scss";
+  @import '../../styles/colors.scss';
 
   .footer {
     width: 100%;

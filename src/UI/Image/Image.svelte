@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { onDestroy } from "svelte";
-  import type { DownloadImage } from "../ListWrapper/models/download-image.model";
-  import Separator from "../Separator/Separator.svelte";
-  import imageZoomStore from "./image-zoom-store";
+  import { onDestroy } from 'svelte';
+  import type { DownloadImage } from '../ListWrapper/models/download-image.model';
+  import Separator from '../Separator/Separator.svelte';
+  import imageZoomStore from './image-zoom-store';
 
   export let image: DownloadImage;
   let isZoomed: boolean;
 
-  const unsubscribe = imageZoomStore.subscribe(
-    (shouldRotate) => (isZoomed = shouldRotate)
-  );
+  const unsubscribe = imageZoomStore.subscribe((shouldRotate) => {
+    isZoomed = shouldRotate;
+  });
 
   onDestroy(() => {
     unsubscribe();

@@ -1,27 +1,28 @@
-const getFileSize = (size: number): string => {
+const getFileSize = (size: number | undefined): string => {
   const round = (num: number): number =>
     Math.round((num + Number.EPSILON) * 100) / 100;
 
-  if (size < 1024) {
-    return round(size) + " Bytes";
+  let fileSize = size ?? 0;
+  if (fileSize < 1024) {
+    return `${round(fileSize)} Bytes`;
   }
 
-  size /= 1024;
-  if (size < 1024) {
-    return round(size) + " KB";
+  fileSize /= 1024;
+  if (fileSize < 1024) {
+    return `${round(fileSize)} KB`;
   }
 
-  size /= 1024;
-  if (size < 1024) {
-    return round(size) + " MB";
+  fileSize /= 1024;
+  if (fileSize < 1024) {
+    return `${round(fileSize)} MB`;
   }
 
-  size /= 1024;
-  if (size < 1024) {
-    return round(size) + " GB";
+  fileSize /= 1024;
+  if (fileSize < 1024) {
+    return `${round(fileSize)} GB`;
   }
 
-  return round(size) + " TB";
+  return `${round(fileSize)} TB`;
 };
 
 export default getFileSize;

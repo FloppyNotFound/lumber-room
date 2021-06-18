@@ -1,57 +1,60 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount } from "svelte";
+  import { createEventDispatcher, onMount } from 'svelte';
   import type {
     Dropbox,
     files,
     Error,
     DropboxResponseError,
     auth,
-  } from "dropbox";
-  import type { ListWrapperToast } from "./models/list-wrapper-toast.model";
-  import ListView from "./ListView/ListView.svelte";
-  import { softkeysStore } from "../SoftKeys/softkeys-store";
-  import type { Softkey } from "../SoftKeys/models/softkey.model";
-  import type { DownloadImage } from "./models/download-image.model";
-  import Image from "../Image/Image.svelte";
-  import checkIsAuthError from "./helpers/check-is-auth-error";
-  import getUrlFromBlob from "./helpers/get-url-from-blob";
-  import imageZoomStore from "../Image/image-zoom-store";
-  import type { OpenFileFolderEvent } from "./models/open-file-folder-event.model";
+  } from 'dropbox';
+  import type { ListWrapperToast } from './models/list-wrapper-toast.model';
+  import ListView from './ListView/ListView.svelte';
+  import softkeysStore from '../SoftKeys/softkeys-store';
+  import type { Softkey } from '../SoftKeys/models/softkey.model';
+  import type { DownloadImage } from './models/download-image.model';
+  import Image from '../Image/Image.svelte';
+  import checkIsAuthError from './helpers/check-is-auth-error';
+  import getUrlFromBlob from './helpers/get-url-from-blob';
+  import imageZoomStore from '../Image/image-zoom-store';
+  import type { OpenFileFolderEvent } from './models/open-file-folder-event.model';
 
   export let accessToken: string;
 
   const dispatch = createEventDispatcher();
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  const dbx = new Dropbox.Dropbox({ accessToken });
+  const dbx: Dropbox = new Dropbox.Dropbox({ accessToken }); // eslint-disable-line
 
   let isLoading: boolean;
   let listFolderResult: files.ListFolderResult;
 
-  let downloadImage: DownloadImage;
+  let downloadImage: DownloadImage | undefined;
 
   let historyStack: string[] = [];
 
   $: isOnRootLevel = historyStack.length === 1;
 
-  onMount(() => loadItems());
+  onMount(async () => {
+    await loadItems();
+  });
 
   //#region Load Items
-  const loadItemsHandler = (event: CustomEvent<OpenFileFolderEvent>) =>
-    loadItems(event.detail.path);
+  const onLoadItems = (
+    event: CustomEvent<OpenFileFolderEvent>
+  ): Promise<void> => loadItems(event.detail.path);
 
-  const loadItems = async (
-    path: string = "",
-    isNavBack = false
-  ): Promise<void> => {
+  const loadItems = async (path = '', isNavBack = false): Promise<void> => {
     isLoading = true;
 
-    await (<Dropbox>dbx)
+    await dbx
       .filesListFolder({ path, include_media_info: true })
-      .then((response) => (listFolderResult = response.result))
-      .then(() =>
-        !isNavBack ? (historyStack = [...historyStack, path]) : void 0
-      )
+      .then((response) => {
+        listFolderResult = response.result;
+      })
+      .then(() => {
+        if (!isNavBack) historyStack = [...historyStack, path];
+      })
       .then(() => {
         if (isOnRootLevel) {
           softkeysStore.setLeft(void 0);
@@ -59,7 +62,7 @@
         }
 
         softkeysStore.setLeft({
-          label: "Back",
+          label: 'Back',
           callback: () => {
             const prevPath = historyStack.slice(-2, -1)[0];
             historyStack = historyStack.slice(0, -2);
@@ -68,9 +71,11 @@
           },
         });
       })
-      .then(() => (isLoading = false))
+      .then(() => {
+        isLoading = false;
+      })
       .catch(
-        (
+        async (
           errorResponse: DropboxResponseError<
             Error<files.ListFolderError | auth.AuthError>
           >
@@ -78,33 +83,33 @@
           isLoading = false;
 
           if (!errorResponse.error?.error) {
-            dispatch("error", <ListWrapperToast>{
+            dispatch('error', <ListWrapperToast>{
               message: <string>(<unknown>errorResponse.error),
             });
             return;
           }
 
-          const tag = errorResponse.error?.error[".tag"];
+          const tag = errorResponse.error?.error['.tag'];
 
-          if (errorResponse.status === 409 && tag === "path") {
-            dispatch("error", <ListWrapperToast>{ message: "Path not found" });
-            loadItems("");
+          if (errorResponse.status === 409 && tag === 'path') {
+            dispatch('error', <ListWrapperToast>{ message: 'Path not found' });
+            await loadItems('');
             return;
           }
 
           if (checkIsAuthError(errorResponse)) {
-            dispatch("autherror");
+            dispatch('autherror');
             return;
           }
 
-          alert(tag);
+          console.error('Unknown auth error', tag);
         }
       );
   };
   //#endregion
 
   //#region Load Item
-  const loadItemHandler = (event: CustomEvent<OpenFileFolderEvent>) =>
+  const onLoadItem = (event: CustomEvent<OpenFileFolderEvent>): Promise<void> =>
     downloadItem(event.detail.path);
 
   const downloadItem = async (path: string): Promise<void> => {
@@ -112,20 +117,20 @@
 
     const downloadArgs = <files.DownloadArg>{ path };
 
-    await (<Dropbox>dbx)
+    await dbx
       .filesDownload(downloadArgs)
       .then((item) => {
-        console.log("downloaded", item, item.result.is_downloadable);
+        console.log('downloaded', item, item.result.is_downloadable);
         isLoading = false;
 
         if (item.result.is_downloadable) {
+          const fileBlobResult = <{ fileBlob: Blob }>(<unknown>item.result);
           downloadImage = <DownloadImage>{
-            // @ts-ignore
-            src: getUrlFromBlob(item.result.fileBlob),
+            src: getUrlFromBlob(fileBlobResult.fileBlob),
             alt: item.result.name,
           };
         } else {
-          throw new Error("Unsupported file type");
+          throw new Error('Unsupported file type');
         }
       })
       .then(() => {
@@ -133,7 +138,7 @@
       })
       .catch((errorResponse) => {
         if (checkIsAuthError(errorResponse)) {
-          dispatch("autherror");
+          dispatch('autherror');
           return;
         }
 
@@ -141,13 +146,15 @@
       })
       .catch((err: Error<string> | unknown) => {
         if (err instanceof Error) {
-          dispatch("warn", <ListWrapperToast>{ message: err.message });
+          dispatch('warn', <ListWrapperToast>{ message: err.message });
           return;
         }
 
         throw err;
       })
-      .then(() => (isLoading = false));
+      .then(() => {
+        isLoading = false;
+      });
   };
   //#endregion
 
@@ -155,18 +162,17 @@
     softkeysStore.stack();
 
     softkeysStore.setRight({
-      label: "Zoom",
-      callback: () => {
-        return new Promise((resolve) => {
+      label: 'Zoom',
+      callback: () =>
+        new Promise((resolve) => {
           imageZoomStore.update((isZoomed) => !isZoomed);
           resolve();
-        });
-      },
+        }),
     });
 
     softkeysStore.setCenter();
     softkeysStore.setLeft({
-      label: "Back",
+      label: 'Back',
       callback: () => {
         downloadImage = void 0;
         softkeysStore.pop();
@@ -182,8 +188,8 @@
 {:else if listFolderResult && listFolderResult.entries.length}
   <ListView
     items="{listFolderResult}"
-    on:openfolder="{loadItemsHandler}"
-    on:openfile="{loadItemHandler}" />
+    on:openfolder="{onLoadItems}"
+    on:openfile="{onLoadItem}" />
 {:else}
   <div class="status-message">
     <div>This folder is empty</div>
