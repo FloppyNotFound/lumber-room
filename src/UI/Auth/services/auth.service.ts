@@ -38,10 +38,6 @@ export default class AuthService {
     }
   }
 
-  // TODO: set correct redirect url
-  // TODO: https://developer.kaiostech.com/getting-started/main-concepts/manifest
-  // TODO: https://www.dropbox.com/lp/developers/reference/oauth-guide
-  // see https://www.dropbox.com/developers/documentation/http/documentation
   getAuthenticationUrl(): Promise<string> {
     return this._dbxInstance
       .getAuthenticationUrl(
