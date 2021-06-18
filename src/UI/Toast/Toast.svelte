@@ -49,7 +49,6 @@
     color: white;
     text-align: center;
     min-height: 2rem;
-
     display: flex;
     justify-content: center;
     align-items: center;

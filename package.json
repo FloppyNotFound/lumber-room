@@ -15,6 +15,7 @@
     "pretty": "prettier --write ./src/**/*.{ts,svelte}",
     "pretty-quick": "pretty-quick --staged",
     "lint": "eslint src --ext .svelte,.ts",
+    "lint:style": "stylelint src/**/*.{css,scss,svelte}",
     "prepare": "husky install"
   },
   "devDependencies": {
@@ -42,6 +43,9 @@
     "rollup-plugin-terser": "^7.0.0",
     "sass": "^1.32.0",
     "sirv-cli": "^1.0.0",
+    "stylelint": "^13.13.1",
+    "stylelint-config-prettier": "^8.0.2",
+    "stylelint-config-standard": "^22.0.0",
     "svelte": "^3.0.0",
     "svelte-check": "^1.0.0",
     "svelte-preprocess": "^4.6.1",
