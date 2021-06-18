@@ -179,7 +179,7 @@
   </main>
 
   <SoftKeys />
-  <DPad className="{'list-view-item'}" correction="{-46}" />
+  <DPad className="{'list-view-item'}" correction="{-300}" />
 </div>
 
 <style lang="scss">
