@@ -138,6 +138,12 @@
     await logout();
   };
 
+  const onLogout = async (): Promise<void> => {
+    toastStore.info('You have logged out');
+
+    await logout();
+  };
+
   const logout = async (): Promise<void> => {
     await authDbService.logout();
     authStore.set(void 0);
@@ -163,7 +169,7 @@
         <ListWrapper
           accessToken="{$authStore}"
           on:autherror="{onAuthError}"
-          on:logout="{logout}"
+          on:logout="{onLogout}"
           on:warn="{showListWrapperWarning}"
           on:error="{showListWrapperError}" />
       {/if}
