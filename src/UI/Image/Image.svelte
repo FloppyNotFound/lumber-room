@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
-  import type { DownloadImage } from '../ListWrapper/models/download-image.model';
+  import type { DownloadImage } from './download-image.model';
   import Separator from '../Separator/Separator.svelte';
   import imageZoomStore from './image-zoom-store';
 
