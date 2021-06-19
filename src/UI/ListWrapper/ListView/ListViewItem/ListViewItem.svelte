@@ -3,15 +3,17 @@
   import getFileSize from './helpers/get-file-size';
   import type { OpenFileFolderEvent } from '../../models/open-file-folder-event.model';
   import type { FileFolder } from './models/file-folder.interface';
+  import checkIsImage from './helpers/check-is-image';
+  import checkIsPdf from './helpers/check-is-pdf';
 
   export let item: FileFolder;
   export let tabIndex: number;
 
   $: isFolder = item.isFolder;
 
-  $: isImage = checkIsImage(item);
+  $: isImage = checkIsImage(item.name);
 
-  $: isPdf = getFileEnding(item).endsWith('.pdf');
+  $: isPdf = checkIsPdf(item.name);
 
   $: fileSize = getFileSize(item.sizeBytes);
 
@@ -27,18 +29,6 @@
 
   const getModifiedDate = (date: string | undefined): string =>
     date ? new Date(date).toDateString() : '';
-
-  const getFileEnding = (file: FileFolder): string => file.name.toLowerCase();
-
-  /**
-   * @see https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types
-   * @param file
-   */
-  const checkIsImage = (file: FileFolder): boolean => {
-    const imageFileEndings = ['jpg', 'jpeg', 'jfif', 'pjpeg', 'pjp', 'png'];
-    const fileEnding = getFileEnding(file).split('.').pop()?.toLowerCase();
-    return !!fileEnding && imageFileEndings.includes(fileEnding);
-  };
 
   const onButtonClicked = (): void =>
     isFolder ? onOpenFolder(item.path) : onOpenFile(item.path);
