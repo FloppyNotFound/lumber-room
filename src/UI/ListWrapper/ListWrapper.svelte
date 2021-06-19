@@ -17,6 +17,7 @@
   import getUrlFromBlob from './helpers/get-url-from-blob';
   import imageZoomStore from '../Image/image-zoom-store';
   import type { OpenFileFolderEvent } from './models/open-file-folder-event.model';
+  import checkIsImage from './ListView/ListViewItem/helpers/check-is-image';
 
   export let accessToken: string;
 
@@ -132,7 +133,11 @@
         console.log('downloaded', item, item.result.is_downloadable);
         isLoading = false;
 
-        if (item.result.is_downloadable) {
+        if (!item.result.is_downloadable) {
+          throw new Error('File not downloadable');
+        }
+
+        if (checkIsImage(item.result.name)) {
           const fileBlobResult = <{ fileBlob: Blob }>(<unknown>item.result);
           downloadImage = <DownloadImage>{
             src: getUrlFromBlob(fileBlobResult.fileBlob),
