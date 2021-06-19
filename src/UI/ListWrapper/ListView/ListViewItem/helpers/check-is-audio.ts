@@ -1,7 +1,7 @@
 import getFileEnding from './get-file-ending';
 
 const checkIsAudio = (fileName: string): boolean => {
-  const allowedAudioFileTypes = ['mp3', 'wav'];
+  const allowedAudioFileTypes = ['aac', 'mp3', 'wav'];
 
   const fileEnding = getFileEnding(fileName);
 
