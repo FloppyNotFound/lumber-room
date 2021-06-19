@@ -98,14 +98,15 @@
     <Separator text="{audio.name}" />
   </div>
   <div id="audio-wrapper__status">
-    <span>Status:</span>
-    <span>
+    <div id="audio-wrapper__status-content">
       {#if isPlaying}
-        Playing
+        <span class="icon-play3"></span>
+        <span>Playing</span>
       {:else}
-        Paused
+        <span class="icon-pause2"></span>
+        <span>Paused</span>
       {/if}
-    </span>
+    </div>
   </div>
 
   <div id="audio-wrapper__player">
@@ -130,7 +131,17 @@
     }
 
     &__status {
-      margin-top: 1rem;
+      margin-top: 0.5rem;
+
+      &-content {
+        display: flex;
+        align-items: center;
+        height: 2rem;
+
+        * + * {
+          margin-left: 0.5rem;
+        }
+      }
     }
 
     &__player {

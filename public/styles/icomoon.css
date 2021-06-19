@@ -1,16 +1,16 @@
 /* https://icomoon.io */
 @font-face {
-  font-family: "icomoon";
-  src: url("../fonts/icomoon.woff") format("woff");
+  font-family: 'icomoon';
+  src: url('../fonts/icomoon.woff') format('woff');
   font-weight: normal;
   font-style: normal;
   font-display: block;
 }
 
-[class^="icon-"],
-[class*=" icon-"] {
+[class^='icon-'],
+[class*=' icon-'] {
   /* use !important to prevent issues with browser extensions that change fonts */
-  font-family: "icomoon" !important;
+  font-family: 'icomoon' !important;
   font-style: normal;
   font-weight: normal;
   font-variant: normal;
@@ -22,24 +22,21 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.icon-file-empty:before {
-  content: "\e924";
+.icon-file-empty::before {
+  content: '\e924';
 }
-.icon-file-text2:before {
-  content: "\e926";
+.icon-file-picture::before {
+  content: '\e927';
 }
-.icon-file-picture:before {
-  content: "\e927";
+.icon-file-music::before {
+  content: '\e928';
 }
-.icon-file-music:before {
-  content: "\e928";
+.icon-play3::before {
+  content: '\ea1c';
 }
-.icon-file-video:before {
-  content: "\e92a";
+.icon-pause2::before {
+  content: '\ea1d';
 }
-.icon-folder:before {
-  content: "\e92f";
-}
-.icon-file-pdf:before {
-  content: "\eadf";
+.icon-folder::before {
+  content: '\e92f';
 }
