@@ -6,18 +6,32 @@
 
   export let audio: DownloadAudio;
 
-  let isPlaying: boolean;
+  $: isPlaying = !isPaused && !hasEnded && currentTime > 0;
+
+  let isPaused = false;
+  let hasEnded = false;
+  let currentTime = 0;
+  let duration = 0;
 
   let audioPlayer: HTMLMediaElement;
 
+  let updatePlaybackInfoSub: number;
+
   onMount(() => {
     audioPlayer = document.getElementById('audio-player') as HTMLMediaElement;
+
+    updatePlaybackInfoSub = setInterval(() => {
+      duration = audioPlayer.duration;
+      currentTime = audioPlayer.currentTime;
+      isPaused = audioPlayer.paused;
+      hasEnded = audioPlayer.ended;
+
+      if (hasEnded) audioPlayStore.set(false);
+    }, 1000);
   });
 
   const unsubscribeAudioPlay = audioPlayStore.subscribe((shouldPlay) => {
     if (isPlaying === shouldPlay) return;
-
-    isPlaying = shouldPlay;
 
     if (!audioPlayer) return;
 
@@ -33,12 +47,11 @@
   };
 
   const unsubscribeAudioRestart = audioRestartStore.subscribe(() => {
-    console.log('ping');
-
     if (!audioPlayer) return;
 
     audioPlayer.fastSeek(0);
-    startOrStop(true);
+
+    if (!isPlaying) audioPlayStore.set(true);
   });
 
   onDestroy(() => {
@@ -46,11 +59,33 @@
     unsubscribeAudioRestart();
 
     audioPlayStore.set(false);
+
+    clearInterval(updatePlaybackInfoSub);
   });
 </script>
 
 <div class="audio-wrapper">
-  <div>Hello Audio</div>
+  <div>{audio.name}</div>
+  <div>
+    <span>Is Playing:</span>
+    <span>{isPlaying}</span>
+  </div>
+  <div>
+    <span>Is Paused:</span>
+    <span>{isPaused}</span>
+  </div>
+  <div>
+    <span>Has Ended:</span>
+    <span>{hasEnded}</span>
+  </div>
+  <div>
+    <span>Current time:</span>
+    <span>{currentTime}</span>
+  </div>
+  <div>
+    <span>Duration:</span>
+    <span>{duration}</span>
+  </div>
 
   <audio id="audio-player" src="{audio.src}" type="audio/mp3"></audio>
 </div>

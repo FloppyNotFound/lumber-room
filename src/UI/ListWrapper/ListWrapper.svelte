@@ -155,6 +155,7 @@
           const fileBlobResult = <{ fileBlob: Blob }>(<unknown>item.result);
           downloadAudio = <DownloadAudio>{
             src: getUrlFromBlob(fileBlobResult.fileBlob),
+            name: item.result.name,
           };
           setSoftkeysAudio(() => {
             downloadAudio = void 0;
