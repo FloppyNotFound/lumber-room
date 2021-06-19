@@ -37,7 +37,7 @@
       );
 
       if (!newAccessToken) {
-        await resetLogin();
+        await onAuthError();
         return;
       }
 
@@ -56,13 +56,13 @@
       'code'
     );
     if (!pkceCode) {
-      await resetLogin();
+      await onAuthError();
       return;
     }
 
     const newAccessToken = await getNewAccessToken(pkceCodeVerifier, pkceCode);
     if (!newAccessToken) {
-      await resetLogin();
+      await onAuthError();
       return;
     }
 
@@ -72,15 +72,7 @@
   });
 
   const initSoftkeys = (): void => {
-    /* softkeysStore.setLeft({
-      label: "Back",
-      callback: () => {
-        return new Promise((resolve) => {
-          console.info("You clicked on SoftLeft");
-          resolve();
-        });
-      },
-    }); */
+    softkeysStore.setLeft(void 0);
 
     softkeysStore.setCenter({
       label: 'SELECT',
@@ -91,14 +83,7 @@
         }),
     });
 
-    softkeysStore.setRight({
-      label: 'Options',
-      callback: (): Promise<void> =>
-        new Promise((resolve) => {
-          console.info('You clicked on SoftRight');
-          resolve();
-        }),
-    });
+    softkeysStore.setRight(void 0);
   };
 
   const setLoginActive = (): void => {
@@ -112,15 +97,6 @@
     await authDbService.setCodeVerifier(codeVerifierEvent.detail.codeVerifier);
 
     document.location.href = codeVerifierEvent.detail.authLink;
-  };
-
-  const resetLogin = async (): Promise<void> => {
-    toastStore.warn('Your session timed out, please re-login');
-
-    await authDbService.logout();
-    authStore.set(void 0);
-
-    setLoginActive();
   };
 
   const showListWrapperWarning = (msg: CustomEvent<ListWrapperToast>): void =>
@@ -152,8 +128,29 @@
       newAccessToken.accessTokenExpiresInSeconds
     );
     authStore.set(newAccessToken.accessToken);
-    initSoftkeys();
+
     setCursorActive(false);
+  };
+
+  const onAuthError = async (): Promise<void> => {
+    toastStore.warn('Your session timed out, please re-login');
+
+    await logout();
+  };
+
+  const onLogout = async (): Promise<void> => {
+    toastStore.info('You have logged out');
+
+    await logout();
+  };
+
+  const logout = async (): Promise<void> => {
+    await authDbService.logout();
+    authStore.set(void 0);
+
+    setLoginActive();
+
+    initSoftkeys();
   };
 </script>
 
@@ -171,7 +168,8 @@
       {:else}
         <ListWrapper
           accessToken="{$authStore}"
-          on:autherror="{resetLogin}"
+          on:autherror="{onAuthError}"
+          on:logout="{onLogout}"
           on:warn="{showListWrapperWarning}"
           on:error="{showListWrapperError}" />
       {/if}

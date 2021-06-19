@@ -58,6 +58,15 @@
       .then(() => {
         if (isOnRootLevel) {
           softkeysStore.setLeft(void 0);
+
+          softkeysStore.setRight({
+            label: 'Logout',
+            callback: (): Promise<void> =>
+              new Promise((resolve) => {
+                dispatch('logout');
+                resolve();
+              }),
+          });
           return;
         }
 
