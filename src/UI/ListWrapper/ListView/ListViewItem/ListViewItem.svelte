@@ -4,16 +4,16 @@
   import type { OpenFileFolderEvent } from '../../models/open-file-folder-event.model';
   import type { FileFolder } from './models/file-folder.interface';
   import checkIsImage from './helpers/check-is-image';
-  import checkIsPdf from './helpers/check-is-pdf';
+  import checkIsAudio from './helpers/check-is-audio';
 
   export let item: FileFolder;
   export let tabIndex: number;
 
   $: isFolder = item.isFolder;
 
-  $: isImage = checkIsImage(item.name);
+  $: isAudio = checkIsAudio(item.name);
 
-  $: isPdf = checkIsPdf(item.name);
+  $: isImage = checkIsImage(item.name);
 
   $: fileSize = getFileSize(item.sizeBytes);
 
@@ -48,10 +48,10 @@
       </div>
     {:else}
       <div class="col-1">
-        {#if isPdf}
-          <span class="icon-file-pdf"></span>
-        {:else if isImage}
+        {#if isImage}
           <span class="icon-file-picture"></span>
+        {:else if isAudio}
+          <span class="icon-file-music"></span>
         {:else}
           <!-- TODO: Support more file types -->
           <span class="icon-file-empty"></span>
