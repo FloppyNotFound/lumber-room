@@ -6,12 +6,12 @@
 
   export let audio: DownloadAudio;
 
-  $: isPlaying = !isPaused && !hasEnded && currentTime > 0;
+  $: isPlaying = !isPaused && !hasEnded;
 
   let isPaused = false;
   let hasEnded = false;
-  let currentTime = 0;
-  let duration = 0;
+  let currentTime = '0';
+  let duration = '0';
 
   let audioPlayer: HTMLMediaElement;
 
@@ -21,8 +21,8 @@
     audioPlayer = document.getElementById('audio-player') as HTMLMediaElement;
 
     updatePlaybackInfoSub = setInterval(() => {
-      duration = audioPlayer.duration;
-      currentTime = audioPlayer.currentTime;
+      duration = toPlaybackTime(audioPlayer.duration);
+      currentTime = toPlaybackTime(audioPlayer.currentTime);
       isPaused = audioPlayer.paused;
       hasEnded = audioPlayer.ended;
 
@@ -62,6 +62,18 @@
 
     clearInterval(updatePlaybackInfoSub);
   });
+
+  const toPlaybackTime = (timeInSeconds: number): string => {
+    if (Number.isNaN(timeInSeconds)) return '0';
+
+    const minutes = Math.round(timeInSeconds / 60);
+    const minutesPrefix = minutes < 10 ? '0' : '';
+
+    const seconds = Math.round(timeInSeconds % 60);
+    const secondsPrefix = seconds < 10 ? '0' : '';
+
+    return `${minutesPrefix}${minutes}:${secondsPrefix}${seconds} minutes`;
+  };
 </script>
 
 <div class="audio-wrapper">
