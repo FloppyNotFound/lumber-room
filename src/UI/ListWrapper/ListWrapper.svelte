@@ -10,14 +10,17 @@
   import type { ListWrapperToast } from './models/list-wrapper-toast.model';
   import ListView from './ListView/ListView.svelte';
   import softkeysStore from '../SoftKeys/softkeys-store';
-  import type { Softkey } from '../SoftKeys/models/softkey.model';
-  import type { DownloadImage } from './models/download-image.model';
+  import type { DownloadImage } from '../Image/download-image.model';
   import Image from '../Image/Image.svelte';
   import checkIsAuthError from './helpers/check-is-auth-error';
   import getUrlFromBlob from './helpers/get-url-from-blob';
-  import imageZoomStore from '../Image/image-zoom-store';
   import type { OpenFileFolderEvent } from './models/open-file-folder-event.model';
   import checkIsImage from './ListView/ListViewItem/helpers/check-is-image';
+  import checkIsAudio from './ListView/ListViewItem/helpers/check-is-audio';
+  import Audio from '../Audio/Audio.svelte';
+  import type { DownloadAudio } from '../Audio/download-audio.model';
+  import setSoftkeysImage from './helpers/set-softkeys-image';
+  import setSoftkeysAudio from './helpers/set-softkeys-audio';
 
   export let accessToken: string;
 
@@ -30,6 +33,7 @@
   let isLoading: boolean;
   let listFolderResult: files.ListFolderResult;
 
+  let downloadAudio: DownloadAudio | undefined;
   let downloadImage: DownloadImage | undefined;
 
   let historyStack: string[] = [];
@@ -143,12 +147,23 @@
             src: getUrlFromBlob(fileBlobResult.fileBlob),
             alt: item.result.name,
           };
+          setSoftkeysImage(() => {
+            downloadImage = void 0;
+            softkeysStore.pop();
+          });
+        } else if (checkIsAudio(item.result.name)) {
+          const fileBlobResult = <{ fileBlob: Blob }>(<unknown>item.result);
+          downloadAudio = <DownloadAudio>{
+            src: getUrlFromBlob(fileBlobResult.fileBlob),
+            name: item.result.name,
+          };
+          setSoftkeysAudio(() => {
+            downloadAudio = void 0;
+            softkeysStore.pop();
+          });
         } else {
           throw new Error('Unsupported file type');
         }
-      })
-      .then(() => {
-        prepareSoftkeysForSubpage();
       })
       .catch((errorResponse) => {
         if (checkIsAuthError(errorResponse)) {
@@ -171,32 +186,12 @@
       });
   };
   //#endregion
-
-  const prepareSoftkeysForSubpage = (): void => {
-    softkeysStore.stack();
-
-    softkeysStore.setRight({
-      label: 'Zoom',
-      callback: () =>
-        new Promise((resolve) => {
-          imageZoomStore.update((isZoomed) => !isZoomed);
-          resolve();
-        }),
-    });
-
-    softkeysStore.setCenter();
-    softkeysStore.setLeft({
-      label: 'Back',
-      callback: () => {
-        downloadImage = void 0;
-        softkeysStore.pop();
-      },
-    } as Softkey);
-  };
 </script>
 
 {#if isLoading}
   <div class="status-message">Loading...</div>
+{:else if downloadAudio}
+  <Audio audio="{downloadAudio}" />
 {:else if downloadImage}
   <Image image="{downloadImage}" />
 {:else if listFolderResult && listFolderResult.entries.length}
