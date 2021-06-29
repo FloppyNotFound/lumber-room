@@ -1,6 +1,5 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-yarn pretty-quick
 yarn validate
-yarn lint:style
+yarn lint:staged

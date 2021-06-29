@@ -13,9 +13,9 @@
     "start:dev": "sirv public --dev",
     "validate": "svelte-check",
     "pretty": "prettier --write ./src/**/*.{ts,svelte}",
-    "pretty-quick": "pretty-quick --staged",
     "lint": "eslint src --ext .svelte,.ts",
     "lint:style": "stylelint src/**/*.{css,scss,svelte}",
+    "lint:staged": "lint-staged",
     "prepare": "husky install"
   },
   "devDependencies": {
@@ -32,10 +32,10 @@
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-svelte3": "^3.1.2",
     "husky": "^6.0.0",
+    "lint-staged": "^11.0.0",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.2.1",
     "prettier-plugin-svelte": "^2.0.3",
-    "pretty-quick": "^3.1.0",
     "rollup": "^2.3.4",
     "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-livereload": "^2.0.0",
